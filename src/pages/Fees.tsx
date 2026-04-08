@@ -1,4 +1,5 @@
 import Layout from "@/components/layout/Layout";
+import FeeCalculator from "@/components/fees/FeeCalculator";
 
 const tiers = [
   { range: "0.001 – 0.1 BTC", fee: "3.0%", min: "0.00003 BTC" },
@@ -17,6 +18,11 @@ const Fees = () => (
         <p className="text-muted-foreground text-center mb-12 max-w-xl mx-auto">
           Our fees are volume-based and fully transparent. No hidden charges.
         </p>
+
+        {/* Fee Calculator */}
+        <div className="mb-12">
+          <FeeCalculator />
+        </div>
 
         <div className="glass-card overflow-hidden">
           <table className="w-full">
