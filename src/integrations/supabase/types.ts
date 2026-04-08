@@ -14,7 +14,144 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      contact_requests: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          status: Database["public"]["Enums"]["contact_status"]
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          status?: Database["public"]["Enums"]["contact_status"]
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          status?: Database["public"]["Enums"]["contact_status"]
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      logs: {
+        Row: {
+          action: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
+      mix_sessions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          delay_hours: number
+          fee_amount: number
+          fee_rate: number
+          id: string
+          ip_hash: string | null
+          net_amount: number
+          output_address: string
+          session_code: string
+          status: Database["public"]["Enums"]["mix_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          delay_hours?: number
+          fee_amount: number
+          fee_rate?: number
+          id?: string
+          ip_hash?: string | null
+          net_amount: number
+          output_address: string
+          session_code: string
+          status?: Database["public"]["Enums"]["mix_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          delay_hours?: number
+          fee_amount?: number
+          fee_rate?: number
+          id?: string
+          ip_hash?: string | null
+          net_amount?: number
+          output_address?: string
+          session_code?: string
+          status?: Database["public"]["Enums"]["mix_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pricing_rules: {
+        Row: {
+          created_at: string
+          currency: string
+          fee_rate: number
+          id: string
+          is_active: boolean
+          max_amount: number | null
+          min_amount: number
+          min_fee: number
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          fee_rate: number
+          id?: string
+          is_active?: boolean
+          max_amount?: number | null
+          min_amount?: number
+          min_fee?: number
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          fee_rate?: number
+          id?: string
+          is_active?: boolean
+          max_amount?: number | null
+          min_amount?: number
+          min_fee?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +160,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      contact_status: "new" | "read" | "replied" | "archived"
+      mix_status: "pending" | "processing" | "complete" | "failed" | "expired"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +288,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      contact_status: ["new", "read", "replied", "archived"],
+      mix_status: ["pending", "processing", "complete", "failed", "expired"],
+    },
   },
 } as const
