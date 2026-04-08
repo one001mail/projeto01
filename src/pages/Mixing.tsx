@@ -109,6 +109,8 @@ const Mixing = () => {
                     <SelectItem value="BTC">BTC</SelectItem>
                     <SelectItem value="ETH">ETH</SelectItem>
                     <SelectItem value="LTC">LTC</SelectItem>
+                    <SelectItem value="USDT">USDT</SelectItem>
+                    <SelectItem value="USDC">USDC</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

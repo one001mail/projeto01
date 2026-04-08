@@ -98,6 +98,8 @@ const FeeCalculator = () => {
               <SelectItem value="BTC">BTC — Bitcoin</SelectItem>
               <SelectItem value="ETH">ETH — Ethereum</SelectItem>
               <SelectItem value="LTC">LTC — Litecoin</SelectItem>
+              <SelectItem value="USDT">USDT — Tether</SelectItem>
+              <SelectItem value="USDC">USDC — USD Coin</SelectItem>
             </SelectContent>
           </Select>
         </div>

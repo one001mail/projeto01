@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
         )
       }
 
-      if (!['BTC', 'ETH', 'LTC'].includes(currency)) {
+      if (!['BTC', 'ETH', 'LTC', 'USDT', 'USDC'].includes(currency)) {
         return new Response(
           JSON.stringify({ error: 'Unsupported currency' }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
