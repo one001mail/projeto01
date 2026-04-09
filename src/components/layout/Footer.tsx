@@ -1,5 +1,6 @@
 import { Shield } from "lucide-react";
 import { Link } from "react-router-dom";
+import { navLinks } from "@/config/navigation";
 
 const Footer = () => (
   <footer className="border-t border-border bg-card/50 py-12">
@@ -17,9 +18,9 @@ const Footer = () => (
         <div>
           <h4 className="font-mono text-sm font-semibold mb-3 text-foreground">Navigation</h4>
           <div className="flex flex-col gap-2">
-            {["/", "/how-it-works", "/mixing", "/fees"].map((path) => (
-              <Link key={path} to={path} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                {path === "/" ? "Home" : path.slice(1).replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())}
+            {navLinks.filter((l) => ["/", "/how-it-works", "/mixing", "/fees"].includes(l.to)).map((link) => (
+              <Link key={link.to} to={link.to} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                {link.label}
               </Link>
             ))}
           </div>
@@ -27,8 +28,11 @@ const Footer = () => (
         <div>
           <h4 className="font-mono text-sm font-semibold mb-3 text-foreground">Support</h4>
           <div className="flex flex-col gap-2">
-            <Link to="/faq" className="text-sm text-muted-foreground hover:text-primary transition-colors">FAQ</Link>
-            <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact</Link>
+            {navLinks.filter((l) => ["/faq", "/contact"].includes(l.to)).map((link) => (
+              <Link key={link.to} to={link.to} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
         <div>

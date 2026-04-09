@@ -2,15 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Shield } from "lucide-react";
-
-const navLinks = [
-  { to: "/", label: "Home" },
-  { to: "/how-it-works", label: "How It Works" },
-  { to: "/mixing", label: "Mix" },
-  { to: "/fees", label: "Fees" },
-  { to: "/faq", label: "FAQ" },
-  { to: "/contact", label: "Contact" },
-];
+import { navLinks } from "@/config/navigation";
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -46,10 +38,7 @@ const Header = () => {
           </Link>
         </div>
 
-        <button
-          className="md:hidden text-foreground"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
+        <button className="md:hidden text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>

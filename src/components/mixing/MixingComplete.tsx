@@ -1,24 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-interface OutputEntry {
-  address: string;
-  percentage: number;
-}
+import type { MixOutput, Currency } from "@/domain/types";
 
 interface MixingCompleteProps {
   sessionId: string;
   amount: string;
-  currency: string;
+  currency: Currency;
   fee: string;
   netAmount: string;
+  ratePercent: string;
   delay: number;
-  outputs: OutputEntry[];
+  outputs: MixOutput[];
   onReset: () => void;
 }
 
-const MixingComplete = ({ sessionId, amount, currency, fee, netAmount, delay, outputs, onReset }: MixingCompleteProps) => {
+const MixingComplete = ({ sessionId, amount, currency, fee, netAmount, ratePercent, delay, outputs, onReset }: MixingCompleteProps) => {
   const { toast } = useToast();
 
   const copySessionId = () => {
@@ -52,7 +49,7 @@ const MixingComplete = ({ sessionId, amount, currency, fee, netAmount, delay, ou
               <span className="font-mono">{amount} {currency}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Taxa (2.5%)</span>
+              <span className="text-muted-foreground">Taxa ({ratePercent}%)</span>
               <span className="font-mono">{fee} {currency}</span>
             </div>
             <div className="flex justify-between border-t border-border pt-2">

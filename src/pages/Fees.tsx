@@ -1,16 +1,8 @@
 import Layout from "@/components/layout/Layout";
 import FeeCalculator from "@/components/fees/FeeCalculator";
+import { getFeeTableRows } from "@/domain/pricing/pricingRules";
 
-const tiers = [
-  { range: "0.001 – 0.1 BTC", fee: "3.0%", min: "0.00003 BTC" },
-  { range: "0.1 – 1.0 BTC", fee: "2.5%", min: "0.0025 BTC" },
-  { range: "1.0 – 10 BTC", fee: "2.0%", min: "0.02 BTC" },
-  { range: "10+ BTC", fee: "1.5%", min: "0.15 BTC" },
-  { range: "10 – 1,000 USDT/USDC", fee: "3.0%", min: "$0.30" },
-  { range: "1,000 – 10,000 USDT/USDC", fee: "2.5%", min: "$25" },
-  { range: "10,000 – 100,000 USDT/USDC", fee: "2.0%", min: "$200" },
-  { range: "100,000+ USDT/USDC", fee: "1.5%", min: "$1,500" },
-];
+const tiers = getFeeTableRows();
 
 const Fees = () => (
   <Layout>
@@ -23,7 +15,6 @@ const Fees = () => (
           Our fees are volume-based and fully transparent. No hidden charges.
         </p>
 
-        {/* Fee Calculator */}
         <div className="mb-12">
           <FeeCalculator />
         </div>

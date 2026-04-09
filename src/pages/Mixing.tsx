@@ -7,35 +7,36 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import OutputAddresses, { type OutputEntry } from "@/components/mixing/OutputAddresses";
+import OutputAddresses from "@/components/mixing/OutputAddresses";
 import MixingComplete from "@/components/mixing/MixingComplete";
-
-type MixStatus = "idle" | "submitting" | "processing" | "complete";
+import type { Currency, MixOutput, MixStatus } from "@/domain/types";
+import { CURRENCIES, CURRENCY_LABELS } from "@/domain/types";
+import { getQuote, formatCryptoAmount } from "@/domain/pricing/getQuote";
+import { validateMixRequest } from "@/domain/mixing/validateMixRequest";
+import { createSessionId } from "@/domain/mixing/createSessionId";
 
 const Mixing = () => {
   const { toast } = useToast();
   const [amount, setAmount] = useState("");
-  const [currency, setCurrency] = useState("BTC");
-  const [outputs, setOutputs] = useState<OutputEntry[]>([{ address: "", percentage: 100 }]);
+  const [currency, setCurrency] = useState<Currency>("BTC");
+  const [outputs, setOutputs] = useState<MixOutput[]>([{ address: "", percentage: 100 }]);
   const [delay, setDelay] = useState([6]);
   const [status, setStatus] = useState<MixStatus>("idle");
   const [sessionId, setSessionId] = useState("");
 
-  const fee = amount ? (parseFloat(amount) * 0.025).toFixed(6) : "0";
-  const netAmount = amount ? (parseFloat(amount) - parseFloat(fee)).toFixed(6) : "0";
+  const parsedAmount = parseFloat(amount) || 0;
+  const quote = getQuote(currency, parsedAmount);
 
   const handleSubmit = async () => {
-    if (!amount || parseFloat(amount) <= 0) {
-      toast({ title: "Valor inválido", description: "Insira um valor válido.", variant: "destructive" });
-      return;
-    }
-    if (outputs.some((o) => !o.address.trim())) {
-      toast({ title: "Endereço ausente", description: "Preencha todos os endereços de destino.", variant: "destructive" });
-      return;
-    }
-    const totalPct = outputs.reduce((s, o) => s + o.percentage, 0);
-    if (outputs.length > 1 && totalPct !== 100) {
-      toast({ title: "Distribuição inválida", description: `O total deve ser 100% (atual: ${totalPct}%).`, variant: "destructive" });
+    const errors = validateMixRequest({
+      amount: parsedAmount,
+      currency,
+      outputs,
+      delayHours: delay[0],
+    });
+
+    if (errors.length > 0) {
+      toast({ title: "Erro de validação", description: errors[0].message, variant: "destructive" });
       return;
     }
 
@@ -44,7 +45,7 @@ const Mixing = () => {
     setStatus("processing");
     await new Promise((r) => setTimeout(r, 2500));
 
-    const id = `MIX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+    const id = createSessionId();
     setSessionId(id);
     setStatus("complete");
     toast({ title: "Sessão de Mix Criada", description: `Sessão ${id} em processamento.` });
@@ -64,8 +65,9 @@ const Mixing = () => {
           sessionId={sessionId}
           amount={amount}
           currency={currency}
-          fee={fee}
-          netAmount={netAmount}
+          fee={formatCryptoAmount(quote.fee)}
+          netAmount={formatCryptoAmount(quote.net)}
+          ratePercent={quote.ratePercent}
           delay={delay[0]}
           outputs={outputs}
           onReset={handleReset}
@@ -101,55 +103,42 @@ const Mixing = () => {
               </div>
               <div>
                 <Label className="text-xs font-mono text-muted-foreground">Moeda</Label>
-                <Select value={currency} onValueChange={setCurrency} disabled={status !== "idle"}>
+                <Select value={currency} onValueChange={(v) => setCurrency(v as Currency)} disabled={status !== "idle"}>
                   <SelectTrigger className="mt-1 font-mono bg-muted border-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="BTC">BTC</SelectItem>
-                    <SelectItem value="ETH">ETH</SelectItem>
-                    <SelectItem value="LTC">LTC</SelectItem>
-                    <SelectItem value="USDT">USDT</SelectItem>
-                    <SelectItem value="USDC">USDC</SelectItem>
+                    {CURRENCIES.map((c) => (
+                      <SelectItem key={c} value={c}>{CURRENCY_LABELS[c]}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <OutputAddresses
-              outputs={outputs}
-              onChange={setOutputs}
-              disabled={status !== "idle"}
-            />
+            <OutputAddresses outputs={outputs} onChange={setOutputs} disabled={status !== "idle"} />
 
             <div>
               <div className="flex justify-between mb-2">
                 <Label className="text-xs font-mono text-muted-foreground">Delay de Entrega</Label>
                 <span className="text-xs font-mono text-primary">{delay[0]} horas</span>
               </div>
-              <Slider
-                value={delay}
-                onValueChange={setDelay}
-                min={1}
-                max={72}
-                step={1}
-                disabled={status !== "idle"}
-              />
+              <Slider value={delay} onValueChange={setDelay} min={1} max={72} step={1} disabled={status !== "idle"} />
               <div className="flex justify-between mt-1">
                 <span className="text-xs text-muted-foreground">1h</span>
                 <span className="text-xs text-muted-foreground">72h</span>
               </div>
             </div>
 
-            {amount && parseFloat(amount) > 0 && (
+            {parsedAmount > 0 && (
               <div className="bg-muted/50 rounded-lg p-4 space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Taxa (2.5%)</span>
-                  <span className="font-mono">{fee} {currency}</span>
+                  <span className="text-muted-foreground">Taxa ({quote.ratePercent}%)</span>
+                  <span className="font-mono">{formatCryptoAmount(quote.fee)} {currency}</span>
                 </div>
                 <div className="flex justify-between font-semibold">
                   <span className="text-muted-foreground">Você Recebe</span>
-                  <span className="font-mono text-primary">{netAmount} {currency}</span>
+                  <span className="font-mono text-primary">{formatCryptoAmount(quote.net)} {currency}</span>
                 </div>
                 {outputs.length > 1 && (
                   <div className="border-t border-border pt-2 space-y-1">
@@ -158,7 +147,7 @@ const Mixing = () => {
                       <div key={i} className="flex justify-between text-xs">
                         <span className="font-mono truncate max-w-[180px]">{o.address || `Endereço ${i + 1}`}</span>
                         <span className="font-mono text-primary">
-                          {(parseFloat(netAmount) * o.percentage / 100).toFixed(6)} {currency} ({o.percentage}%)
+                          {formatCryptoAmount(quote.net * o.percentage / 100)} {currency} ({o.percentage}%)
                         </span>
                       </div>
                     ))}
@@ -173,12 +162,7 @@ const Mixing = () => {
               </p>
             </div>
 
-            <Button
-              variant="hero"
-              className="w-full"
-              onClick={handleSubmit}
-              disabled={status !== "idle"}
-            >
+            <Button variant="hero" className="w-full" onClick={handleSubmit} disabled={status !== "idle"}>
               {status === "submitting" && <Loader2 className="h-4 w-4 animate-spin" />}
               {status === "processing" && <Loader2 className="h-4 w-4 animate-spin" />}
               {status === "idle" && "Criar Sessão de Mix"}
