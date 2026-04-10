@@ -38,7 +38,7 @@ const Index = () => (
             Privacy-First Protocol — Active
           </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in-delay-1">
-            Dissociation of Origin and Destination
+            <span>Dissociation of Origin and Destination</span>
             <br />
             <span className="text-gradient-green">For Your Transactions</span>
           </h1>
