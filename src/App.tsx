@@ -9,6 +9,7 @@ import Mixing from "./pages/Mixing.tsx";
 import Fees from "./pages/Fees.tsx";
 import FAQ from "./pages/FAQ.tsx";
 import Contact from "./pages/Contact.tsx";
+import SessionLookup from "./pages/SessionLookup.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/mixing" element={<Mixing />} />
+          <Route path="/session" element={<SessionLookup />} />
           <Route path="/fees" element={<Fees />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/contact" element={<Contact />} />

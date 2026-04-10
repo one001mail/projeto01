@@ -13,7 +13,7 @@ import type { Currency, MixOutput, MixStatus } from "@/domain/types";
 import { CURRENCIES, CURRENCY_LABELS } from "@/domain/types";
 import { getQuote, formatCryptoAmount } from "@/domain/pricing/getQuote";
 import { validateMixRequest } from "@/domain/mixing/validateMixRequest";
-import { supabase } from "@/integrations/supabase/client";
+import { createMixSession } from "@/services/mixingApi";
 
 const Mixing = () => {
   const { toast } = useToast();
@@ -44,23 +44,13 @@ const Mixing = () => {
     setStatus("submitting");
 
     try {
-      const { data, error } = await supabase.functions.invoke("mix-session", {
-        body: {
-          currency,
-          amount: parsedAmount,
-          outputs: outputs.map(o => ({ address: o.address.trim(), percentage: o.percentage })),
-          delay_hours: delay[0],
-        },
+      const session = await createMixSession({
+        currency,
+        amount: parsedAmount,
+        outputs,
+        delay_hours: delay[0],
       });
 
-      if (error || !data?.session) {
-        const msg = data?.error || error?.message || "Falha ao criar sessão";
-        toast({ title: "Erro", description: msg, variant: "destructive" });
-        setStatus("idle");
-        return;
-      }
-
-      const session = data.session;
       setSessionId(session.session_code);
       setSessionData(session);
       setStatus("complete");
