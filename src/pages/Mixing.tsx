@@ -171,11 +171,6 @@ const Mixing = () => {
               </div>
             )}
 
-            <div className="glass-card p-3 border-warning/30">
-              <p className="text-xs text-muted-foreground">
-                <span className="text-warning font-mono">⚠ AVISO:</span> Este é um serviço simulado. Nenhuma criptomoeda real é mixada.
-              </p>
-            </div>
 
             <Button variant="hero" className="w-full" onClick={handleSubmit} disabled={status !== "idle"}>
               {status === "submitting" && <Loader2 className="h-4 w-4 animate-spin" />}
