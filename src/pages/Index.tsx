@@ -76,17 +76,6 @@ const Index = () => (
       </div>
     </section>
 
-    {/* Disclaimer */}
-    <section className="py-12 border-t border-border bg-card/30">
-      <div className="container">
-        <div className="glass-card p-6 border-warning/30">
-          <p className="text-xs text-muted-foreground text-center">
-            <span className="text-warning font-mono font-semibold">⚠ DISCLAIMER:</span>{" "}
-            CryptoMix is a demonstration application for educational purposes. This service simulates cryptocurrency mixing. No real transactions are processed. Users must comply with all applicable local laws and regulations.
-          </p>
-        </div>
-      </div>
-    </section>
   </Layout>
 );
 
