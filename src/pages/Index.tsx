@@ -38,8 +38,8 @@ const Index = () => (
             Privacy-First Protocol — Active
           </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in-delay-1">
-            Reclaim Your{" "}
-            <span className="text-gradient-green">Financial Privacy</span>
+            Dissociation of Origin and Destination{" "}
+            <span className="text-gradient-green">For Your Transactions</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in-delay-2">
             CryptoMix breaks the on-chain link between your transactions using advanced mixing pools, time delays, and multi-address distribution.
