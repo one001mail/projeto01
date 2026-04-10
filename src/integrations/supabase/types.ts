@@ -71,6 +71,38 @@ export type Database = {
         }
         Relationships: []
       }
+      mix_session_outputs: {
+        Row: {
+          address: string
+          created_at: string
+          id: string
+          percentage: number
+          session_id: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          id?: string
+          percentage?: number
+          session_id: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          id?: string
+          percentage?: number
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mix_session_outputs_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "mix_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mix_sessions: {
         Row: {
           amount: number
