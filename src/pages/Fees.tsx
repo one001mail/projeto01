@@ -48,11 +48,6 @@ const Fees = () => (
               A minimum fee applies to ensure network costs are covered. Formula: <code className="text-primary font-mono">fee = max(amount × rate, minFee)</code>
             </p>
           </div>
-          <div className="glass-card p-5 border-warning/30">
-            <p className="text-xs text-muted-foreground">
-              <span className="text-warning font-mono">⚠ SIMULATED:</span> These fees are for demonstration only. No real charges apply.
-            </p>
-          </div>
         </div>
       </div>
     </section>
