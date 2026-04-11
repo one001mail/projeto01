@@ -59,8 +59,7 @@ const HowItWorks = () => (
             <div>
               <h4 className="font-mono font-semibold text-sm text-warning mb-1">Important Notice</h4>
               <p className="text-xs text-muted-foreground">
-                This is a simulated mixing service for demonstration purposes. No real blockchain transactions are executed. 
-                The mixing process described above is a conceptual representation of how privacy-enhancing transaction mixing works.
+                This is.
               </p>
             </div>
           </div>
