@@ -93,9 +93,6 @@ const FeeCalculator = () => {
         </div>
       </div>
 
-      <p className="text-[10px] text-muted-foreground text-center font-mono">
-        <span className="text-warning">⚠ SIMULADO:</span> Valores apenas para demonstração. Nenhuma cobrança real é aplicada.
-      </p>
     </div>
   );
 };
