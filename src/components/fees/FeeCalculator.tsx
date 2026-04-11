@@ -23,14 +23,14 @@ const FeeCalculator = () => {
           <Calculator className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h3 className="font-mono font-semibold text-lg">Calculadora de Taxas</h3>
-          <p className="text-xs text-muted-foreground">Simule o custo da sua operação</p>
+          <h3 className="font-mono font-semibold text-lg">Fee Calculator</h3>
+          <p className="text-xs text-muted-foreground">Estimate the cost of your operation</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label className="font-mono text-xs text-muted-foreground">Moeda</Label>
+          <Label className="font-mono text-xs text-muted-foreground">Currency</Label>
           <Select value={currency} onValueChange={(v) => { setCurrency(v as Currency); setAmount(CURRENCY_RANGES[v as Currency].min * 10); }}>
             <SelectTrigger className="bg-muted/30 border-border font-mono">
               <SelectValue />
@@ -43,7 +43,7 @@ const FeeCalculator = () => {
           </Select>
         </div>
         <div className="sm:col-span-2 space-y-2">
-          <Label className="font-mono text-xs text-muted-foreground">Valor ({currency})</Label>
+          <Label className="font-mono text-xs text-muted-foreground">Amount ({currency})</Label>
           <Input
             type="number"
             min={range.min}
@@ -68,11 +68,11 @@ const FeeCalculator = () => {
       </div>
 
       <div className="rounded-lg border border-border bg-muted/20 p-5 space-y-4">
-        <div className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Resultado</div>
+        <div className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Result</div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <ResultCard label="Taxa Aplicada" value={`${result.ratePercent}%`} sub={`min: ${formatCryptoAmount(result.minFee)} ${currency}`} />
-          <ResultCard label="Valor da Taxa" value={`${formatCryptoAmount(result.fee)} ${currency}`} highlight />
-          <ResultCard label="Você Recebe" value={`${formatCryptoAmount(result.net)} ${currency}`} />
+          <ResultCard label="Applied Rate" value={`${result.ratePercent}%`} sub={`min: ${formatCryptoAmount(result.minFee)} ${currency}`} />
+          <ResultCard label="Fee Amount" value={`${formatCryptoAmount(result.fee)} ${currency}`} highlight />
+          <ResultCard label="You Receive" value={`${formatCryptoAmount(result.net)} ${currency}`} />
         </div>
         <div className="space-y-2 pt-2">
           <div className="flex items-center gap-2 text-sm font-mono">
@@ -87,8 +87,8 @@ const FeeCalculator = () => {
             <div className="h-full bg-destructive/60 transition-all duration-300" style={{ width: `${(result.fee / amount) * 100}%` }} />
           </div>
           <div className="flex justify-between text-[10px] font-mono text-muted-foreground">
-            <span>Líquido ({((result.net / amount) * 100).toFixed(1)}%)</span>
-            <span>Taxa ({((result.fee / amount) * 100).toFixed(1)}%)</span>
+            <span>Net ({((result.net / amount) * 100).toFixed(1)}%)</span>
+            <span>Fee ({((result.fee / amount) * 100).toFixed(1)}%)</span>
           </div>
         </div>
       </div>
