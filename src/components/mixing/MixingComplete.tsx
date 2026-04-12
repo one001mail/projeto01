@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Copy, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { QRCodeSVG } from "qrcode.react";
 import type { MixOutput, Currency } from "@/domain/types";
 
 interface MixingCompleteProps {
@@ -43,9 +44,14 @@ const MixingComplete = ({ sessionId, amount, currency, fee, netAmount, ratePerce
 
           {depositAddress && (
             <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 mb-6">
-              <div className="flex items-center justify-center gap-2 mb-2">
+              <div className="flex items-center justify-center gap-2 mb-3">
                 <Wallet className="h-5 w-5 text-primary" />
                 <p className="text-xs text-primary font-mono font-semibold">ENDEREÇO DE DEPÓSITO ({currency})</p>
+              </div>
+              <div className="flex justify-center mb-3">
+                <div className="bg-white p-3 rounded-lg">
+                  <QRCodeSVG value={depositAddress} size={160} />
+                </div>
               </div>
               <div className="flex items-center justify-center gap-2">
                 <code className="text-primary font-mono text-sm break-all">{depositAddress}</code>
