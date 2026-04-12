@@ -112,25 +112,8 @@ Deno.serve(async (req) => {
       const session_code = `MIX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`
       const primary_address = outputs[0].address
 
-      // Create Coinbase Commerce charge to get deposit address
-      let deposit_address: string | null = null
-      let coinbase_charge_id: string | null = null
-      let coinbase_addresses: Record<string, string> = {}
-
-      try {
-        const charge = await createCoinbaseCharge(amount, currency, session_code)
-        coinbase_charge_id = charge.id || null
-
-        // Extract addresses from charge
-        if (charge.addresses) {
-          coinbase_addresses = charge.addresses
-          const coinbaseKey = CURRENCY_TO_COINBASE[currency]
-          deposit_address = coinbaseKey ? (charge.addresses[coinbaseKey] || null) : null
-        }
-      } catch (cbErr) {
-        console.error('Coinbase charge creation failed:', cbErr)
-        // Continue without deposit address — session still created
-      }
+      // Generate simulated deposit address
+      const deposit_address = generateSimulatedAddress(currency)
 
       // Insert session
       const { data, error } = await supabase.from('mix_sessions').insert({
