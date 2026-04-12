@@ -9,48 +9,18 @@ interface OutputEntry {
   percentage: number;
 }
 
-const CURRENCY_TO_COINBASE: Record<string, string> = {
-  BTC: 'bitcoin',
-  ETH: 'ethereum',
-  LTC: 'litecoin',
-  USDT: 'tether',
-  USDC: 'usdc',
-}
+function generateSimulatedAddress(currency: string): string {
+  const chars = '0123456789abcdef'
+  const randomHex = (len: number) => Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
 
-async function createCoinbaseCharge(amount: number, currency: string, sessionCode: string) {
-  const apiKey = Deno.env.get('COINBASE_COMMERCE_API_KEY')
-  if (!apiKey) {
-    throw new Error('COINBASE_COMMERCE_API_KEY is not configured')
+  switch (currency) {
+    case 'BTC': return 'bc1q' + randomHex(38)
+    case 'ETH': return '0x' + randomHex(40)
+    case 'LTC': return 'ltc1q' + randomHex(38)
+    case 'USDT': return '0x' + randomHex(40)
+    case 'USDC': return '0x' + randomHex(40)
+    default: return '0x' + randomHex(40)
   }
-
-  const res = await fetch('https://api.commerce.coinbase.com/charges', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CC-Api-Key': apiKey,
-      'X-CC-Version': '2018-03-22',
-    },
-    body: JSON.stringify({
-      name: `Mix Session ${sessionCode}`,
-      description: `Crypto mixing deposit for session ${sessionCode}`,
-      pricing_type: 'fixed_price',
-      local_price: {
-        amount: amount.toString(),
-        currency: currency,
-      },
-      metadata: {
-        session_code: sessionCode,
-      },
-    }),
-  })
-
-  const json = await res.json()
-  if (!res.ok) {
-    console.error('Coinbase Commerce error:', JSON.stringify(json))
-    throw new Error(`Coinbase Commerce API error [${res.status}]: ${json?.error?.message || 'Unknown error'}`)
-  }
-
-  return json.data
 }
 
 Deno.serve(async (req) => {
@@ -142,25 +112,8 @@ Deno.serve(async (req) => {
       const session_code = `MIX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`
       const primary_address = outputs[0].address
 
-      // Create Coinbase Commerce charge to get deposit address
-      let deposit_address: string | null = null
-      let coinbase_charge_id: string | null = null
-      let coinbase_addresses: Record<string, string> = {}
-
-      try {
-        const charge = await createCoinbaseCharge(amount, currency, session_code)
-        coinbase_charge_id = charge.id || null
-
-        // Extract addresses from charge
-        if (charge.addresses) {
-          coinbase_addresses = charge.addresses
-          const coinbaseKey = CURRENCY_TO_COINBASE[currency]
-          deposit_address = coinbaseKey ? (charge.addresses[coinbaseKey] || null) : null
-        }
-      } catch (cbErr) {
-        console.error('Coinbase charge creation failed:', cbErr)
-        // Continue without deposit address — session still created
-      }
+      // Generate simulated deposit address
+      const deposit_address = generateSimulatedAddress(currency)
 
       // Insert session
       const { data, error } = await supabase.from('mix_sessions').insert({
@@ -201,7 +154,6 @@ Deno.serve(async (req) => {
           currency,
           amount,
           output_count: outputs.length,
-          coinbase_charge_id,
           has_deposit_address: !!deposit_address,
         },
       })
@@ -212,8 +164,6 @@ Deno.serve(async (req) => {
             ...data,
             outputs: outputRows.map(o => ({ address: o.address, percentage: o.percentage })),
             deposit_address,
-            coinbase_charge_id,
-            coinbase_addresses,
           }
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 201 }
