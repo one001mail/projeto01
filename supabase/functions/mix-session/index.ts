@@ -154,7 +154,6 @@ Deno.serve(async (req) => {
           currency,
           amount,
           output_count: outputs.length,
-          coinbase_charge_id,
           has_deposit_address: !!deposit_address,
         },
       })
@@ -165,8 +164,6 @@ Deno.serve(async (req) => {
             ...data,
             outputs: outputRows.map(o => ({ address: o.address, percentage: o.percentage })),
             deposit_address,
-            coinbase_charge_id,
-            coinbase_addresses,
           }
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 201 }
