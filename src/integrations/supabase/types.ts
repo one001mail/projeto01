@@ -184,6 +184,39 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_sessions: {
+        Row: {
+          asset: string
+          created_at: string
+          id: string
+          network: string
+          output_address: string
+          session_code: string
+          status: Database["public"]["Enums"]["wallet_session_status"]
+          updated_at: string
+        }
+        Insert: {
+          asset: string
+          created_at?: string
+          id?: string
+          network: string
+          output_address: string
+          session_code: string
+          status?: Database["public"]["Enums"]["wallet_session_status"]
+          updated_at?: string
+        }
+        Update: {
+          asset?: string
+          created_at?: string
+          id?: string
+          network?: string
+          output_address?: string
+          session_code?: string
+          status?: Database["public"]["Enums"]["wallet_session_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -194,6 +227,7 @@ export type Database = {
     Enums: {
       contact_status: "new" | "read" | "replied" | "archived"
       mix_status: "pending" | "processing" | "complete" | "failed" | "expired"
+      wallet_session_status: "created" | "funded" | "completed" | "expired"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -323,6 +357,7 @@ export const Constants = {
     Enums: {
       contact_status: ["new", "read", "replied", "archived"],
       mix_status: ["pending", "processing", "complete", "failed", "expired"],
+      wallet_session_status: ["created", "funded", "completed", "expired"],
     },
   },
 } as const
