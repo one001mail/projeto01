@@ -10,6 +10,7 @@ import Fees from "./pages/Fees.tsx";
 import FAQ from "./pages/FAQ.tsx";
 import Contact from "./pages/Contact.tsx";
 import SessionLookup from "./pages/SessionLookup.tsx";
+import NewSession from "./pages/NewSession.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
