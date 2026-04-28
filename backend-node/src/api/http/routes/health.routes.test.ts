@@ -1,19 +1,15 @@
 import { afterAll, describe, expect, it } from 'vitest';
-import { _resetConfigForTests, loadConfig } from '../../app/config.js';
-import { buildServer } from '../../app/server.js';
-import { closeRedis } from '../../infra/cache/redis.js';
-import { closePostgres } from '../../infra/db/postgres.js';
+import { _resetConfigForTests, loadConfig } from '../../../app/config.js';
+import { buildApp } from '../../../app/build-app.js';
 
 describe('GET /health', () => {
-  afterAll(async () => {
-    await closePostgres();
-    await closeRedis();
+  afterAll(() => {
     _resetConfigForTests();
   });
 
   it('returns a structured health payload', async () => {
     const config = loadConfig();
-    const app = await buildServer(config);
+    const { app } = await buildApp(config);
 
     const res = await app.inject({ method: 'GET', url: '/health' });
     expect(res.statusCode).toBe(200);
@@ -33,11 +29,11 @@ describe('GET /health', () => {
     expect(typeof body.uptimeSeconds).toBe('number');
     expect(typeof body.timestamp).toBe('string');
 
-    await app.close();
+    await app.close(); // triggers container.dispose() via onClose hook
   });
 
   it('returns 404 envelope for unknown routes', async () => {
-    const app = await buildServer(loadConfig());
+    const { app } = await buildApp(loadConfig());
     const res = await app.inject({ method: 'GET', url: '/does-not-exist' });
     expect(res.statusCode).toBe(404);
     const body = res.json() as { error: { code: string; requestId: string } };

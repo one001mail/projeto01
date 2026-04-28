@@ -1,19 +1,9 @@
 /**
  * Bounded contexts (DDD modules) live here.
  *
- * Each module is self-contained and follows Clean Architecture:
+ * Module rules: see `_template/README.md`.
  *
- *   modules/<name>/
- *     domain/        — entities, value objects, domain services, repository ports
- *     application/   — use cases / orchestrators (depend on domain only)
- *     infra/         — driven adapters: repositories, external clients
- *     index.ts       — public composition: registers routes / event handlers
- *
- * Modules communicate **only** via:
- *   - the in-process event bus (`infra/events`)
- *   - the outbox table (for cross-process / durable delivery)
- *
- * Direct imports from one module's `domain` or `application` into another are
- * forbidden — enforce this via lint rules in a later phase.
+ * Cross-module communication goes through the event bus or outbox. A module
+ * may NEVER import another module's `domain/` or `application/`.
  */
-export const MODULES_REGISTERED: readonly string[] = [];
+export { registerTemplateModule } from './_template/index.js';
