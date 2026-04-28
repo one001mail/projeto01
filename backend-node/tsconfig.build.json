@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "sourceMap": false,
+    "removeComments": true,
+    "declaration": false
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests",
+    "vitest.config.ts",
+    "src/**/*.test.ts",
+    "src/**/*.integration.test.ts",
+    "src/**/*.e2e.test.ts"
+  ]
+}
