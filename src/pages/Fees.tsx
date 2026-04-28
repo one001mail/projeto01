@@ -1,6 +1,7 @@
 import Layout from "@/components/layout/Layout";
 import FeeCalculator from "@/components/fees/FeeCalculator";
 import { getFeeTableRows } from "@/domain/pricing/pricingRules";
+import { Notice } from "@/shared/ui/Notice";
 
 const tiers = getFeeTableRows();
 
@@ -9,10 +10,10 @@ const Fees = () => (
     <section className="py-20">
       <div className="container max-w-3xl">
         <h1 className="text-4xl font-bold mb-4 text-center">
-          Transparent <span className="text-gradient-green">Pricing</span>
+          Tabela de <span className="text-gradient-green">Taxas</span>
         </h1>
         <p className="text-muted-foreground text-center mb-12 max-w-xl mx-auto">
-          Our fees are volume-based and fully transparent. No hidden charges.
+          A taxa varia por faixa de valor. Não há cobranças adicionais ocultas.
         </p>
 
         <div className="mb-12">
@@ -23,9 +24,9 @@ const Fees = () => (
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/30">
-                <th className="px-6 py-4 text-left text-xs font-mono text-muted-foreground uppercase tracking-wider">Volume Range</th>
-                <th className="px-6 py-4 text-left text-xs font-mono text-muted-foreground uppercase tracking-wider">Fee Rate</th>
-                <th className="px-6 py-4 text-left text-xs font-mono text-muted-foreground uppercase tracking-wider">Min Fee</th>
+                <th className="px-6 py-4 text-left text-xs font-mono text-muted-foreground uppercase tracking-wider">Faixa de Valor</th>
+                <th className="px-6 py-4 text-left text-xs font-mono text-muted-foreground uppercase tracking-wider">Taxa</th>
+                <th className="px-6 py-4 text-left text-xs font-mono text-muted-foreground uppercase tracking-wider">Taxa Mínima</th>
               </tr>
             </thead>
             <tbody>
@@ -40,14 +41,12 @@ const Fees = () => (
           </table>
         </div>
 
-        <div className="mt-8 space-y-4">
-          <div className="glass-card p-5">
-            <h3 className="font-mono font-semibold text-sm mb-2">How Fees Are Calculated</h3>
-            <p className="text-sm text-muted-foreground">
-              The fee percentage is applied to the total input amount. The tier is determined by the input amount.
-              A minimum fee applies to ensure network costs are covered. Formula: <code className="text-primary font-mono">fee = max(amount × rate, minFee)</code>
-            </p>
-          </div>
+        <div className="mt-8">
+          <Notice tone="info" title="Como o cálculo é feito">
+            A faixa é determinada pelo valor de entrada. A taxa percentual é aplicada sobre esse valor.
+            Quando o resultado é menor que a taxa mínima da faixa, prevalece a taxa mínima.
+            <div className="mt-2 font-mono text-primary">taxa = max(valor × percentual, taxa_minima)</div>
+          </Notice>
         </div>
       </div>
     </section>
