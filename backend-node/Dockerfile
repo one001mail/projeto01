@@ -23,7 +23,8 @@ CMD ["npx", "tsx", "watch", "src/index.ts"]
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npx tsc -p tsconfig.build.json
+RUN npx tsc -p tsconfig.build.json && \
+    cp -r src/infra/db/migrations dist/infra/db/migrations
 
 # ---------- prod ----------
 FROM node:20-alpine AS prod

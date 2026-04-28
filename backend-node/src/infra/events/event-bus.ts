@@ -1,30 +1,21 @@
 /**
- * In-memory event bus.
+ * In-memory EventBus adapter.
  *
- * Phase-B1.5 contract + working in-memory implementation. The bus is
- * deliberately minimal:
- *   - publish/subscribe by event name
- *   - synchronous-async dispatch (each handler awaited individually)
- *   - per-handler errors are isolated and logged via the `onError` hook so
- *     one bad subscriber can't poison the rest
+ * Implements the canonical port from `shared/application/ports/event-bus.port`.
+ * The `EventBus` and helper types are re-exported here so existing imports
+ * (`@infra/events/event-bus`) continue to work.
  *
- * In B3 we add: an outbox-backed durable bus, retry policy, dead-letter sink,
- * and replay. This in-memory version stays for tests and intra-process events.
+ * The B3 outbox-backed bus will implement the same port and replace this
+ * adapter in production composition without subscriber-side changes.
  */
 import type { DomainEvent } from './domain-event.js';
+import type {
+  EventBus,
+  EventHandler,
+  Unsubscribe,
+} from '../../shared/application/ports/event-bus.port.js';
 
-export type EventHandler<E extends DomainEvent = DomainEvent> = (event: E) => Promise<void> | void;
-
-export type Unsubscribe = () => void;
-
-export interface EventBus {
-  publish<E extends DomainEvent>(event: E): Promise<void>;
-  subscribe<E extends DomainEvent>(name: E['name'], handler: EventHandler<E>): Unsubscribe;
-  /** Number of handlers for a given event name (debug / metrics). */
-  handlerCount(name: string): number;
-  /** Releases all handlers. Idempotent. */
-  close(): Promise<void>;
-}
+export type { EventBus, EventHandler, Unsubscribe };
 
 export interface InMemoryEventBusOptions {
   /** Called when a handler throws. Defaults to swallow + console.warn. */
@@ -36,7 +27,6 @@ export function createInMemoryEventBus(options: InMemoryEventBusOptions = {}): E
   const onError =
     options.onError ??
     ((err, event) => {
-      // Last-resort log; structured logger is not in scope here.
       // biome-ignore lint/suspicious/noConsole: bus is infra; structured logger may not be available.
       console.warn('event handler error', { event: event.name, err });
     });
@@ -45,8 +35,7 @@ export function createInMemoryEventBus(options: InMemoryEventBusOptions = {}): E
     async publish(event) {
       const set = handlers.get(event.name);
       if (!set || set.size === 0) return;
-      // Snapshot so handlers that subscribe/unsubscribe during dispatch
-      // don't mutate the set we're iterating.
+      // Snapshot: subscriptions changing during dispatch must not corrupt iteration.
       const snapshot = Array.from(set);
       for (const h of snapshot) {
         try {
@@ -63,7 +52,7 @@ export function createInMemoryEventBus(options: InMemoryEventBusOptions = {}): E
         handlers.set(name, set);
       }
       set.add(handler as EventHandler);
-      return () => {
+      return (): void => {
         set?.delete(handler as EventHandler);
         if (set && set.size === 0) handlers.delete(name);
       };
