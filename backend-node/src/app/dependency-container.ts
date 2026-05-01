@@ -1,3 +1,7 @@
+import { closeRedis, getRedis } from '../infra/cache/redis.js';
+import { closePostgres, getPool } from '../infra/db/postgres.js';
+import { createInMemoryEventBus } from '../infra/events/event-bus.js';
+import { createNoopQueue } from '../infra/queue/noop-queue.js';
 /**
  * Dependency Container.
  *
@@ -12,10 +16,6 @@
  */
 import type { AppContext } from './app-context.js';
 import type { Config } from './config.js';
-import { closePostgres, getPool } from '../infra/db/postgres.js';
-import { closeRedis, getRedis } from '../infra/cache/redis.js';
-import { createInMemoryEventBus } from '../infra/events/event-bus.js';
-import { createNoopQueue } from '../infra/queue/queue.port.js';
 
 export interface Container extends AppContext {
   /** Releases every owned resource. Idempotent. */

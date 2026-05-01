@@ -23,10 +23,7 @@ import type {
 
 function wrap(client: { query: PoolClient['query'] }): QueryRunner {
   return {
-    async query<T = unknown>(
-      sql: string,
-      params?: readonly unknown[],
-    ): Promise<QueryResult<T>> {
+    async query<T = unknown>(sql: string, params?: readonly unknown[]): Promise<QueryResult<T>> {
       const r = await client.query(sql, params as unknown[] | undefined);
       return { rows: r.rows as T[], rowCount: r.rowCount };
     },

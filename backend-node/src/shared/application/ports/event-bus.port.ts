@@ -6,11 +6,11 @@
  * `infra/events/event-bus.ts` implements this port. The outbox-backed bus
  * (B3) will implement it too, transparently to subscribers.
  */
-import type { DomainEvent } from '../../../infra/events/domain-event.js';
+import type { DomainEvent } from './domain-event.port.js';
 
-export type EventHandler<E extends DomainEvent = DomainEvent> = (
-  event: E,
-) => Promise<void> | void;
+export type { DomainEvent };
+
+export type EventHandler<E extends DomainEvent = DomainEvent> = (event: E) => Promise<void> | void;
 
 export type Unsubscribe = () => void;
 

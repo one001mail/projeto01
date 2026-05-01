@@ -18,9 +18,7 @@ export type CreateExampleError = { kind: 'INVALID_INPUT'; message: string };
 export class CreateExampleUseCase {
   constructor(private readonly repo: ExampleRepository) {}
 
-  async execute(
-    input: CreateExampleInput,
-  ): Promise<Ok<{ id: string }> | Err<CreateExampleError>> {
+  async execute(input: CreateExampleInput): Promise<Ok<{ id: string }> | Err<CreateExampleError>> {
     let entity: Example;
     try {
       entity = Example.create(input);

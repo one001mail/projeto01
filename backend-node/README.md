@@ -63,6 +63,8 @@ docker compose up --build
 | `npm run build`         | Type-check + emit to `dist/`                  |
 | `npm run start`         | Run compiled output                           |
 | `npm run typecheck`     | `tsc --noEmit`                                |
+| `npm run check:boundaries` | Architecture boundary validator (`tools/check-boundaries.ts`) |
+| `npm run check:arch`    | Boundaries + typecheck (local pre-push gate)  |
 | `npm run lint`          | Biome lint + format check                     |
 | `npm test`              | Run all Vitest suites                         |
 | `npm run test:unit`     | Unit tests only                               |

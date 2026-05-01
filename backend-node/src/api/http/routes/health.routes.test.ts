@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, it } from 'vitest';
-import { _resetConfigForTests, loadConfig } from '../../../app/config.js';
 import { buildApp } from '../../../app/build-app.js';
+import { _resetConfigForTests, loadConfig } from '../../../app/config.js';
 
 describe('GET /health', () => {
   afterAll(() => {

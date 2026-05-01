@@ -1,18 +1,23 @@
 /**
- * Global error handler.
+ * Global HTTP error handler (Fastify adapter).
  *
- * Translates any thrown error into the stable JSON envelope:
+ * Lives in `api/http/` because it is a framework adapter: it turns any
+ * thrown error into the project's stable HTTP envelope. The pure error
+ * model (`AppError`, `ErrorCode`) stays in `shared/errors/` so the domain
+ * and application layers can depend on it without reaching into Fastify.
+ *
+ * Envelope shape:
  *   { error: { code, message, details?, requestId } }
  *
- * - `AppError`        → use its statusCode + code as-is.
- * - `ZodError`        → 422 with field-level details.
- * - Fastify validation→ 400 with field-level details.
- * - everything else   → 500 INTERNAL, message scrubbed in production.
+ *   - `AppError`        -->gt; use its statusCode + code as-is.
+ *   - `ZodError`        -->gt; 422 with field-level details.
+ *   - Fastify validation-->gt; 400 with field-level details.
+ *   - everything else   -->gt; 500 INTERNAL, message scrubbed in production.
  */
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { ZodError } from 'zod';
-import { AppError } from './app-error.js';
-import { ErrorCode } from './error-codes.js';
+import { AppError } from '../../shared/errors/app-error.js';
+import { ErrorCode } from '../../shared/errors/error-codes.js';
 
 interface ErrorEnvelope {
   error: {
@@ -38,7 +43,7 @@ export function registerErrorHandler(app: FastifyInstance): void {
   app.setErrorHandler((err: unknown, req: FastifyRequest, reply: FastifyReply) => {
     const requestId = req.id;
 
-    // 1) AppError — our own contract
+    // 1) AppError -- our own contract
     if (err instanceof AppError) {
       req.log.warn(
         { err, code: err.code, statusCode: err.statusCode, details: err.details },
@@ -55,7 +60,7 @@ export function registerErrorHandler(app: FastifyInstance): void {
       return reply.code(err.statusCode).send(body);
     }
 
-    // 2) Zod — schema/parsing failure
+    // 2) Zod -- schema/parsing failure
     if (err instanceof ZodError) {
       req.log.info({ issues: err.issues }, 'validation error');
       const body: ErrorEnvelope = {
@@ -84,7 +89,7 @@ export function registerErrorHandler(app: FastifyInstance): void {
       return reply.code(maybeFastify.statusCode ?? 400).send(body);
     }
 
-    // 4) Unknown — 5xx, scrub in production
+    // 4) Unknown -- 5xx, scrub in production
     req.log.error({ err }, 'unhandled error');
     const isProd = process.env.NODE_ENV === 'production';
     const body: ErrorEnvelope = {

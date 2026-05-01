@@ -11,11 +11,11 @@
  * (request id, user, idempotency key) belongs on `FastifyRequest`, not here.
  */
 import type { FastifyInstance } from 'fastify';
-import type { Pool } from 'pg';
 import type { Redis } from 'ioredis';
+import type { Pool } from 'pg';
+import type { EventBus } from '../shared/application/ports/event-bus.port.js';
+import type { QueuePort } from '../shared/application/ports/queue.port.js';
 import type { Config } from './config.js';
-import type { EventBus } from '../infra/events/event-bus.js';
-import type { QueuePort } from '../infra/queue/queue.port.js';
 
 export interface AppContext {
   readonly config: Config;

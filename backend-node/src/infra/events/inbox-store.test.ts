@@ -3,8 +3,8 @@ import type {
   QueryResult,
   QueryRunner,
 } from '../../shared/application/ports/transaction-manager.port.js';
-import { createInMemoryEventBus } from './event-bus.js';
 import { makeEvent } from './domain-event.js';
+import { createInMemoryEventBus } from './event-bus.js';
 import { createPgInboxStore } from './inbox-store.js';
 import { registerEventHandlers } from './register-event-handlers.js';
 
@@ -12,10 +12,7 @@ class FakeRunner implements QueryRunner {
   public calls: { sql: string; params: readonly unknown[] }[] = [];
   public claimed = new Set<string>();
 
-  async query<T = unknown>(
-    sql: string,
-    params: readonly unknown[] = [],
-  ): Promise<QueryResult<T>> {
+  async query<T = unknown>(sql: string, params: readonly unknown[] = []): Promise<QueryResult<T>> {
     this.calls.push({ sql, params });
     if (sql.includes('INSERT INTO inbox_events')) {
       const key = `${params[0]}:${params[1]}`;

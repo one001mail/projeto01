@@ -18,6 +18,8 @@
     "lint": "biome check src tests",
     "lint:fix": "biome check --write src tests",
     "typecheck": "tsc --noEmit",
+    "check:boundaries": "tsx tools/check-boundaries.ts",
+    "check:arch": "npm run check:boundaries && npm run typecheck",
     "migrate": "tsx src/infra/db/migrate.ts"
   },
   "dependencies": {

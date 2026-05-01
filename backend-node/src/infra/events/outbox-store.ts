@@ -1,3 +1,4 @@
+import type { QueryRunner } from '../../shared/application/ports/transaction-manager.port.js';
 /**
  * Outbox store.
  *
@@ -11,7 +12,6 @@
  * `TransactionManager.getCurrentRunner()` falls back to the connection pool.
  */
 import type { DomainEvent } from './domain-event.js';
-import type { QueryRunner } from '../../shared/application/ports/transaction-manager.port.js';
 
 export type OutboxStatus = 'pending' | 'processed' | 'failed';
 

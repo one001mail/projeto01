@@ -30,7 +30,10 @@ export async function registerModules(app: FastifyInstance): Promise<void> {
     app.log.debug({ module: mod.name }, 'registering module');
     await mod.register(app);
   }
-  app.log.info({ count: MODULES.length, modules: MODULES.map((m) => m.name) }, 'modules registered');
+  app.log.info(
+    { count: MODULES.length, modules: MODULES.map((m) => m.name) },
+    'modules registered',
+  );
 }
 
 export function listRegisteredModules(): readonly string[] {

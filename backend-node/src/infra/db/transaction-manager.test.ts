@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
 import type { Pool, PoolClient } from 'pg';
+import { describe, expect, it } from 'vitest';
 import { PgTransactionManager } from './transaction-manager.js';
 
 /**

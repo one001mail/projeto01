@@ -14,13 +14,13 @@
  * container reference, useful for test cleanup.
  */
 import Fastify, { type FastifyInstance } from 'fastify';
-import type { Config } from './config.js';
 import { buildLoggerOptions } from '../infra/logging/logger.js';
 import { attachAppContext } from './app-context.js';
+import type { Config } from './config.js';
 import { type Container, createContainer } from './dependency-container.js';
+import { registerModules } from './register-modules.js';
 import { registerPlugins } from './register-plugins.js';
 import { registerRoutes } from './register-routes.js';
-import { registerModules } from './register-modules.js';
 
 export interface BuiltApp {
   app: FastifyInstance;

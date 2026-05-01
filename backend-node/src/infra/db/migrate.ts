@@ -138,7 +138,11 @@ export async function runMigrations(opts: RunOptions = {}): Promise<RunResult> {
     );
 
     if (dryRun) {
-      return { applied: plan.toApply.map((m) => m.filename), alreadyApplied: plan.alreadyApplied, dryRun };
+      return {
+        applied: plan.toApply.map((m) => m.filename),
+        alreadyApplied: plan.alreadyApplied,
+        dryRun,
+      };
     }
 
     const applied2: string[] = [];
@@ -147,10 +151,10 @@ export async function runMigrations(opts: RunOptions = {}): Promise<RunResult> {
       try {
         await client.query('BEGIN');
         await client.query(m.sql);
-        await client.query(
-          'INSERT INTO schema_migrations (filename, checksum) VALUES ($1, $2)',
-          [m.filename, m.checksum],
-        );
+        await client.query('INSERT INTO schema_migrations (filename, checksum) VALUES ($1, $2)', [
+          m.filename,
+          m.checksum,
+        ]);
         await client.query('COMMIT');
         applied2.push(m.filename);
         log.info({ filename: m.filename }, 'migration applied');

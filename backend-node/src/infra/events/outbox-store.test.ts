@@ -10,10 +10,7 @@ class FakeRunner implements QueryRunner {
   public calls: { sql: string; params: readonly unknown[] }[] = [];
   public fixtures: Array<(sql: string, params: readonly unknown[]) => QueryResult<unknown>> = [];
 
-  async query<T = unknown>(
-    sql: string,
-    params: readonly unknown[] = [],
-  ): Promise<QueryResult<T>> {
+  async query<T = unknown>(sql: string, params: readonly unknown[] = []): Promise<QueryResult<T>> {
     this.calls.push({ sql, params });
     const f = this.fixtures.shift();
     if (f) return f(sql, params) as QueryResult<T>;

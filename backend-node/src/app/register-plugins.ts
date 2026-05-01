@@ -1,3 +1,6 @@
+import cors from '@fastify/cors';
+import helmet from '@fastify/helmet';
+import sensible from '@fastify/sensible';
 /**
  * Fastify plugin registration.
  *
@@ -8,11 +11,8 @@
  * intercept everything routes throw.
  */
 import type { FastifyInstance } from 'fastify';
-import sensible from '@fastify/sensible';
-import helmet from '@fastify/helmet';
-import cors from '@fastify/cors';
+import { registerErrorHandler } from '../api/http/error-handler.js';
 import type { Config } from './config.js';
-import { registerErrorHandler } from '../shared/errors/error-handler.js';
 
 export async function registerPlugins(app: FastifyInstance, config: Config): Promise<void> {
   await app.register(sensible);

@@ -1,23 +1,18 @@
 /**
- * Domain Event base type.
+ * Domain event factory (infra-side).
  *
- * Every event published on the bus is a plain object with:
- *   - `name`: globally-unique, dotted, past-tense (e.g. `payment.captured`).
- *   - `id`: ULID/UUID, generated at the source of truth (the aggregate).
- *   - `occurredAt`: ISO-8601 instant produced when the aggregate emits it.
- *   - `payload`: serializable application data — no class instances.
+ * The `DomainEvent` *type* lives in `shared/application/ports/` so every
+ * layer can name events without depending on infra. This file owns the
+ * concrete *factory* — it uses `crypto.randomUUID()` and real wall-clock
+ * time, which are infrastructure concerns.
  *
- * Events are immutable contracts. Renames are breaking changes; introduce a
- * new event name and deprecate the old one rather than mutating `payload`.
+ * Tests that need determinism should construct `DomainEvent` literals
+ * directly (the type is exported from the shared port) or inject a custom
+ * factory via a port.
  */
-export interface DomainEvent<TPayload = unknown> {
-  readonly id: string;
-  readonly name: string;
-  readonly occurredAt: string;
-  readonly payload: TPayload;
-  /** Optional aggregate identity for ordering / partitioning downstream. */
-  readonly aggregateId?: string;
-}
+import type { DomainEvent } from '../../shared/application/ports/domain-event.port.js';
+
+export type { DomainEvent };
 
 export function makeEvent<TPayload>(
   name: string,

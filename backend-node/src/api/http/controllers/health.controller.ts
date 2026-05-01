@@ -6,8 +6,8 @@
  * decides JSON shape.
  */
 import type { FastifyInstance } from 'fastify';
-import { pingPostgres } from '../../../infra/db/postgres.js';
 import { pingRedis } from '../../../infra/cache/redis.js';
+import { pingPostgres } from '../../../infra/db/postgres.js';
 
 export interface HealthCheckResult {
   status: 'ok' | 'degraded';

@@ -1,3 +1,8 @@
+import type {
+  EventBus,
+  EventHandler,
+  Unsubscribe,
+} from '../../shared/application/ports/event-bus.port.js';
 /**
  * Event handler registration.
  *
@@ -10,11 +15,6 @@
  * from `outbox_events` instead of an in-process bus.
  */
 import type { DomainEvent } from './domain-event.js';
-import type {
-  EventBus,
-  EventHandler,
-  Unsubscribe,
-} from '../../shared/application/ports/event-bus.port.js';
 import type { InboxStore } from './inbox-store.js';
 
 export interface EventHandlerRegistration<E extends DomainEvent = DomainEvent> {

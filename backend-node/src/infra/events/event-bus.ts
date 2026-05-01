@@ -1,3 +1,8 @@
+import type {
+  EventBus,
+  EventHandler,
+  Unsubscribe,
+} from '../../shared/application/ports/event-bus.port.js';
 /**
  * In-memory EventBus adapter.
  *
@@ -9,11 +14,6 @@
  * adapter in production composition without subscriber-side changes.
  */
 import type { DomainEvent } from './domain-event.js';
-import type {
-  EventBus,
-  EventHandler,
-  Unsubscribe,
-} from '../../shared/application/ports/event-bus.port.js';
 
 export type { EventBus, EventHandler, Unsubscribe };
 

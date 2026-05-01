@@ -14,7 +14,7 @@ modules/<name>/
 └─ index.ts       — public composition: `registerModule(app)` plugin
 ```
 
-## Dependency rules (enforced by review; lint rule lands in B4)
+## Dependency rules (enforced by `tools/check-boundaries.ts`)
 
 1. `domain/` imports nothing from `application/` or `infra/`. It is pure.
 2. `application/` imports `domain/` and the **ports** it defines. It never
@@ -25,6 +25,11 @@ modules/<name>/
    B3). One module does not import another module's internals.
 5. `index.ts` is the only externally-importable entry. It wires concrete
    adapters to ports, registers HTTP routes, subscribes to events.
+
+All five rules are verified on every push by
+`backend-node/tools/check-boundaries.ts`
+(`npm run check:boundaries`). See the top-level `architecture.md` for
+the full matrix.
 
 ## Adding a new module
 
