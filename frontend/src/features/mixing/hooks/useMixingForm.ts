@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import type { Currency, MixOutput, MixStatus } from "@/domain/types";
 import { getQuote } from "@/domain/pricing/getQuote";
 import { validateMixRequest, type ValidationError } from "@/domain/mixing/validateMixRequest";
-import { createMixSession, type MixSessionResponse } from "@/services/mixingApi";
+import { createMixSession, type MixSessionResponse } from "../services/mixingApi";
 
 export interface UseMixingFormState {
   amount: string;

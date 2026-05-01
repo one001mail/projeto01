@@ -3,14 +3,13 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import HowItWorks from "./pages/HowItWorks.tsx";
-import Mixing from "./pages/Mixing.tsx";
-import Fees from "./pages/Fees.tsx";
-import FAQ from "./pages/FAQ.tsx";
-import Contact from "./pages/Contact.tsx";
-import SessionLookup from "./pages/SessionLookup.tsx";
-import NewSession from "./pages/NewSession.tsx";
+import { HomePage } from "@/features/home";
+import { HowItWorksPage } from "@/features/how-it-works";
+import { MixingPage, SessionLookupPage } from "@/features/mixing";
+import { FeesPage } from "@/features/fees";
+import { FAQPage } from "@/features/faq";
+import { ContactPage } from "@/features/contact";
+import { NewSessionPage } from "@/features/session";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -22,14 +21,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
-          <Route path="/mixing" element={<Mixing />} />
-          <Route path="/session" element={<SessionLookup />} />
-          <Route path="/new-session" element={<NewSession />} />
-          <Route path="/fees" element={<Fees />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
+          <Route path="/mixing" element={<MixingPage />} />
+          <Route path="/session" element={<SessionLookupPage />} />
+          <Route path="/new-session" element={<NewSessionPage />} />
+          <Route path="/fees" element={<FeesPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -206,6 +206,35 @@ frontend:
           uploaded. Cannot run on GitHub from this sandbox — all gates
           verified locally via `yarn ci`.
 
+  - task: "P1 frontend feature architecture refactor"
+    implemented: true
+    working: true
+    file: "frontend/src/features/**, frontend/src/shared/layout/**, frontend/src/shared/ui/GlobalDisclaimerBanner.tsx, frontend/src/App.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          Refactored /app/frontend/src into feature-based architecture.
+          Each of home/how-it-works/mixing/fees/faq/contact (+ session)
+          now exposes components/, hooks/, services/, content/ + index.ts
+          barrel. Pages are thin composition — all business logic lives
+          in feature hooks/services. Global disclaimer banner added at
+          top of Layout, visible on every page. Removed misleading copy
+          from footer ("privacy-focused mixing service" → "demonstração
+          educacional"). Accessibility pass: skip link, aria-labels on
+          nav/buttons, aria-current on active link, aria-invalid/
+          aria-describedby on form fields, aria-live on result regions,
+          semantic ol/ul/dl/fieldset/legend, role=alert/status, aria-
+          hidden on decorative icons. Verified: typecheck=0, lint=0
+          errors (7 pre-existing shadcn warnings), all 33 vitest tests
+          pass, `yarn build` succeeds. Home + Mixing pages render
+          correctly, global banner visible, inline validation still
+          triggers "Insira um valor válido." on empty submit.
+
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
@@ -228,3 +257,9 @@ agent_communication:
       bundle + backend tsc dist).
       Full report at /app/docs/P0_CI_GATES.md.
       No backend testing agent run needed — pure tooling/CI change.
+  - agent: "main"
+    message: |
+      P1 frontend feature architecture refactor complete. See
+      /app/docs/P1_FRONTEND_ARCHITECTURE.md for the new tree, full
+      moved-file list, and UX improvements. No backend changes; all
+      local gates remain green (typecheck, lint, 33/33 tests, build).

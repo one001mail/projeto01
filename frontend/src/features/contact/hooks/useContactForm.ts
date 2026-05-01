@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { contactSchema, type ContactFormData } from "@/domain/contact/contactSchema";
-import { supabase } from "@/integrations/supabase/client";
+import { submitContactRequest } from "../services/contactApi";
+import { CONTACT_COPY } from "../content/copy";
 
 export function useContactForm() {
   const [form, setForm] = useState<ContactFormData>({ name: "", email: "", subject: "", message: "" });
@@ -29,17 +30,11 @@ export function useContactForm() {
     setSubmitError(null);
     setSending(true);
     try {
-      const { error } = await supabase.from("contact_requests").insert({
-        name: result.data.name,
-        email: result.data.email,
-        subject: result.data.subject || null,
-        message: result.data.message,
-      });
-      if (error) throw error;
+      await submitContactRequest(result.data);
       setSent(true);
       return { ok: true };
     } catch {
-      setSubmitError("Não foi possível enviar a mensagem. Tente novamente.");
+      setSubmitError(CONTACT_COPY.submitError);
       return { ok: false };
     } finally {
       setSending(false);
