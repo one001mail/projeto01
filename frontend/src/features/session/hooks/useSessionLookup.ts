@@ -19,8 +19,9 @@ export function useSessionLookup() {
     try {
       const result = await lookupMixSession(trimmed);
       setSession(result);
-    } catch (err: any) {
-      setError(err?.message || "Sessão não encontrada.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Sessão não encontrada.";
+      setError(message);
     } finally {
       setLoading(false);
     }

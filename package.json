@@ -1,0 +1,24 @@
+{
+  "name": "monorepo-root",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Workspace root: runs CI gates across frontend and backend-node",
+  "scripts": {
+    "typecheck": "yarn typecheck:frontend && yarn typecheck:backend",
+    "typecheck:frontend": "cd frontend && yarn typecheck",
+    "typecheck:backend": "cd backend-node && yarn typecheck",
+    "lint": "yarn lint:frontend && yarn lint:backend",
+    "lint:frontend": "cd frontend && yarn lint",
+    "lint:backend": "cd backend-node && yarn lint",
+    "test": "yarn test:frontend && yarn test:backend",
+    "test:frontend": "cd frontend && yarn test",
+    "test:backend": "cd backend-node && yarn test",
+    "test:coverage": "yarn test:coverage:frontend && yarn test:coverage:backend",
+    "test:coverage:frontend": "cd frontend && yarn test:coverage",
+    "test:coverage:backend": "cd backend-node && yarn test:coverage",
+    "build": "yarn build:frontend && yarn build:backend",
+    "build:frontend": "cd frontend && yarn build",
+    "build:backend": "cd backend-node && yarn build",
+    "ci": "yarn typecheck && yarn lint && yarn test:coverage && yarn build"
+  }
+}

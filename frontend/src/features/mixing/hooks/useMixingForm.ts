@@ -68,9 +68,10 @@ export function useMixingForm(): UseMixingFormState {
       setSessionData(session);
       setStatus("complete");
       return { ok: true };
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus("idle");
-      return { ok: false, message: err?.message || "Erro inesperado." };
+      const message = err instanceof Error ? err.message : "Erro inesperado.";
+      return { ok: false, message };
     }
   }, [parsedAmount, currency, outputs, delay]);
 

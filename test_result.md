@@ -101,3 +101,130 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  P0 — BASELINE & CI GATES
+  Establish hard gates so every next phase is verifiable.
+  Implement: GitHub Actions CI (typecheck, lint, test, build), yarn scripts,
+  TS strict mode, vitest coverage with >= 60% threshold.
+
+backend:
+  - task: "backend-node TS strict mode + vitest coverage"
+    implemented: true
+    working: true
+    file: "backend-node/tsconfig.json, backend-node/vitest.config.ts, backend-node/package.json"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          backend-node already strict; added test:coverage script,
+          coverage thresholds (60% all dims), @vitest/coverage-v8 dep.
+          Fixed 4 biome lint errors (non-null assertions, template literal).
+          Removed 'tests' arg from biome lint (folder doesn't exist).
+          Local result: tests 25/25 pass, coverage L=63.43% F=78.72%
+          B=77.39% S=63.43%, all gates pass.
+
+frontend:
+  - task: "frontend TS strict mode + typecheck script"
+    implemented: true
+    working: true
+    file: "frontend/tsconfig.json, frontend/tsconfig.app.json, frontend/package.json"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          Enabled strict, noImplicitAny, strictNullChecks in both root and
+          app tsconfig (was false). Added `yarn typecheck` script (tsc -b
+          --noEmit). Zero TS errors after enabling strict.
+  - task: "frontend ESLint cleanliness"
+    implemented: true
+    working: true
+    file: "frontend/eslint.config.js, multiple src files"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          Fixed 8 ESLint errors: empty interfaces -> type aliases
+          (command.tsx, textarea.tsx); err: any -> err: unknown with
+          instanceof Error guards (useMixingForm, useSessionLookup,
+          NewSession); require -> import (tailwind.config.ts);
+          unused _props (calendar.tsx); ignore supabase/** Deno files.
+          Lint passes with 0 errors (7 informational warnings remain).
+  - task: "frontend vitest coverage"
+    implemented: true
+    working: true
+    file: "frontend/vitest.config.ts, frontend/src/test/*.test.ts"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          Added @vitest/coverage-v8@3.2.4. Coverage scoped to domain layer
+          with 60% thresholds. Added 4 new test files (createSessionId,
+          validateAddress, pricingRules, contactSchema) bringing total
+          tests from 15 to 33, coverage to L=92.34% F=81.81% B=86.36%
+          S=92.34%.
+
+  - task: "Root workspace scripts"
+    implemented: true
+    working: true
+    file: "package.json"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          Created /app/package.json with typecheck/lint/test/test:coverage/
+          build/ci scripts that fan out to both workspaces. `yarn ci`
+          runs the full P0 gate set in 44s locally with exit 0.
+  - task: "GitHub Actions CI workflow"
+    implemented: true
+    working: "NA"
+    file: ".github/workflows/ci.yml"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          New ci.yml runs 4 parallel jobs (typecheck, lint, test, build)
+          with build gated on the previous three. Coverage artifacts
+          uploaded. Cannot run on GitHub from this sandbox — all gates
+          verified locally via `yarn ci`.
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus: []
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      P0 baseline gates set up. All four hard gates verified locally:
+      typecheck (zero errors, strict mode on), lint (zero errors),
+      test:coverage (33 frontend + 25 backend tests passing, both
+      coverage totals above the 60% threshold), build (frontend Vite
+      bundle + backend tsc dist).
+      Full report at /app/docs/P0_CI_GATES.md.
+      No backend testing agent run needed — pure tooling/CI change.

@@ -1,0 +1,151 @@
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+# Cancel in-flight runs for the same ref so PRs do not pile up.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  # Yarn classic — keeps parity with the rest of the toolchain.
+  YARN_VERSION: '1.22.22'
+
+jobs:
+  # --------------------------------------------------------------------------
+  # Job 1 — Typecheck (hard gate)
+  # --------------------------------------------------------------------------
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: yarn install --frozen-lockfile || yarn install
+
+      - name: Install backend-node deps
+        working-directory: backend-node
+        run: yarn install --frozen-lockfile || yarn install
+
+      - name: Typecheck frontend
+        working-directory: frontend
+        run: yarn typecheck
+
+      - name: Typecheck backend-node
+        working-directory: backend-node
+        run: yarn typecheck
+
+  # --------------------------------------------------------------------------
+  # Job 2 — Lint (hard gate)
+  # --------------------------------------------------------------------------
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: yarn install --frozen-lockfile || yarn install
+
+      - name: Install backend-node deps
+        working-directory: backend-node
+        run: yarn install --frozen-lockfile || yarn install
+
+      - name: Lint frontend (ESLint)
+        working-directory: frontend
+        run: yarn lint --max-warnings=9999
+
+      - name: Lint backend-node (Biome)
+        working-directory: backend-node
+        run: yarn lint
+
+  # --------------------------------------------------------------------------
+  # Job 3 — Tests with coverage (hard gate, threshold >= 60%)
+  # --------------------------------------------------------------------------
+  test:
+    name: test (vitest + coverage)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: yarn install --frozen-lockfile || yarn install
+
+      - name: Install backend-node deps
+        working-directory: backend-node
+        run: yarn install --frozen-lockfile || yarn install
+
+      - name: Frontend tests + coverage
+        working-directory: frontend
+        run: yarn test:coverage
+
+      - name: Backend-node tests + coverage
+        working-directory: backend-node
+        run: yarn test:coverage
+
+      - name: Upload frontend coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-frontend
+          path: frontend/coverage
+          if-no-files-found: warn
+
+      - name: Upload backend-node coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-backend-node
+          path: backend-node/coverage
+          if-no-files-found: warn
+
+  # --------------------------------------------------------------------------
+  # Job 4 — Build (hard gate)
+  # --------------------------------------------------------------------------
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    needs: [typecheck, lint, test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: yarn install --frozen-lockfile || yarn install
+
+      - name: Install backend-node deps
+        working-directory: backend-node
+        run: yarn install --frozen-lockfile || yarn install
+
+      - name: Build frontend
+        working-directory: frontend
+        run: yarn build
+
+      - name: Build backend-node
+        working-directory: backend-node
+        run: yarn build

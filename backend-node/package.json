@@ -12,11 +12,12 @@
     "build": "tsc -p tsconfig.build.json && node -e \"require('node:fs').cpSync('src/infra/db/migrations','dist/infra/db/migrations',{recursive:true})\"",
     "start": "node dist/index.js",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:unit": "vitest run --dir src --exclude '**/*.integration.test.ts' --exclude '**/*.e2e.test.ts'",
     "test:integration": "vitest run --dir src --testNamePattern integration",
     "test:e2e": "vitest run --dir tests/e2e",
-    "lint": "biome check src tests",
-    "lint:fix": "biome check --write src tests",
+    "lint": "biome check src",
+    "lint:fix": "biome check --write src",
     "typecheck": "tsc --noEmit",
     "check:boundaries": "tsx tools/check-boundaries.ts",
     "check:arch": "npm run check:boundaries && npm run typecheck",
@@ -42,6 +43,7 @@
     "@types/pg": "^8.11.6",
     "tsx": "^4.16.2",
     "typescript": "^5.5.4",
-    "vitest": "^2.0.5"
+    "vitest": "^2.0.5",
+    "@vitest/coverage-v8": "^2.0.5"
   }
 }

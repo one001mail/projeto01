@@ -81,9 +81,10 @@ export default function NewSession() {
       setSession(result);
       setFormState("success");
       toast.success("Session created successfully!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       setFormState("error");
-      toast.error(err.message || "Failed to create session");
+      const message = err instanceof Error ? err.message : "Failed to create session";
+      toast.error(message);
     }
   }
 

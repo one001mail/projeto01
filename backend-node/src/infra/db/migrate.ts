@@ -39,8 +39,7 @@ export class ChecksumMismatchError extends Error {
     public readonly current: string,
   ) {
     super(
-      `Checksum mismatch for migration "${filename}": stored=${stored.slice(0, 12)}… current=${current.slice(0, 12)}…. ` +
-        'Migrations are append-only — do not edit applied files.',
+      `Checksum mismatch for migration "${filename}": stored=${stored.slice(0, 12)}… current=${current.slice(0, 12)}…. Migrations are append-only — do not edit applied files.`,
     );
     this.name = 'ChecksumMismatchError';
   }

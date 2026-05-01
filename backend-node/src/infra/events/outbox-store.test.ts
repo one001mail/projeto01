@@ -29,7 +29,8 @@ describe('outbox-store', () => {
 
     expect(id).toBe('returned-id');
     expect(runner.calls).toHaveLength(1);
-    const call = runner.calls[0]!;
+    const call = runner.calls[0];
+    if (!call) throw new Error('expected at least one runner call');
     expect(call.sql).toMatch(/INSERT INTO outbox_events/);
     expect(call.sql).toMatch(/'pending'/);
     expect(call.params[0]).toBe(event.id);
@@ -55,7 +56,9 @@ describe('outbox-store', () => {
     const store = createPgOutboxStore({ defaultRunner: () => runner });
 
     await store.markFailed('id-1', 'boom');
-    expect(runner.calls[0]!.sql).toMatch(/attempts \+ 1 >= 5/);
-    expect(runner.calls[0]!.params).toEqual(['id-1', 'boom']);
+    const failedCall = runner.calls[0];
+    if (!failedCall) throw new Error('expected runner call for markFailed');
+    expect(failedCall.sql).toMatch(/attempts \+ 1 >= 5/);
+    expect(failedCall.params).toEqual(['id-1', 'boom']);
   });
 });
