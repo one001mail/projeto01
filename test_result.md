@@ -235,6 +235,31 @@ frontend:
           triggers "Insira um valor válido." on empty submit.
 
 
+  - task: "P2 frontend API decoupling (shared/api + Supabase removal)"
+    implemented: true
+    working: true
+    file: "frontend/src/shared/api/**, frontend/src/features/*/services/*.ts, frontend/package.json"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: |
+          Created src/shared/api/ with httpClient (fetch wrapper: JSON,
+          timeout via AbortController, exponential backoff retries on
+          5xx/network/timeout for idempotent methods only, query param
+          handling), ApiError (unified kind+status+code+details), and
+          endpoints (centralized /api/* path map). Rewrote mixingApi,
+          sessionsApi, contactApi to go through httpClient. Deleted
+          src/integrations/supabase/{client,types}.ts and removed
+          @supabase/supabase-js from package.json; yarn.lock regenerated.
+          grep for supabase/@supabase in src returns zero matches. All
+          gates green: typecheck 0 errors, lint 0 errors (7 pre-existing
+          shadcn warnings), 41/41 vitest tests (8 new httpClient tests),
+          domain coverage 92.34% lines (gate >=60%), yarn build ok.
+          Full report at /app/docs/P2_FRONTEND_API_DECOUPLING.md.
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
@@ -263,3 +288,17 @@ agent_communication:
       /app/docs/P1_FRONTEND_ARCHITECTURE.md for the new tree, full
       moved-file list, and UX improvements. No backend changes; all
       local gates remain green (typecheck, lint, 33/33 tests, build).
+  - agent: "main"
+    message: |
+      P2 frontend API decoupling complete. All Supabase usage removed
+      from src (0 grep hits for supabase/@supabase). New shared/api
+      layer provides typed httpClient + ApiError + endpoints. Feature
+      services rewritten; hook signatures unchanged so no consumer
+      edits required. Dependency @supabase/supabase-js dropped. All
+      local gates green: typecheck, lint, 41/41 tests (8 new for
+      httpClient), domain coverage 92.34%, build. Full report at
+      /app/docs/P2_FRONTEND_API_DECOUPLING.md. No backend/frontend
+      testing agent run needed — pure frontend refactor; the backend
+      endpoints this client now targets (/api/mix-sessions, /api/
+      sessions, /api/contact-requests) are out of scope for P2 and
+      remain to be implemented on the backend.

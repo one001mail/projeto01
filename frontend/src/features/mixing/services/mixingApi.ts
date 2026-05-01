@@ -1,4 +1,8 @@
-import { supabase } from "@/integrations/supabase/client";
+/**
+ * Mixing feature API surface. All network traffic goes through the shared
+ * httpClient — no direct Supabase or fetch calls.
+ */
+import { httpClient, endpoints } from "@/shared/api";
 import type { Currency, MixOutput } from "@/domain/types";
 
 export interface CreateMixSessionPayload {
@@ -25,41 +29,45 @@ export interface MixSessionResponse {
   coinbase_addresses?: Record<string, string>;
 }
 
-export async function createMixSession(payload: CreateMixSessionPayload): Promise<MixSessionResponse> {
-  const { data, error } = await supabase.functions.invoke("mix-session", {
-    body: {
-      currency: payload.currency,
-      amount: payload.amount,
-      outputs: payload.outputs.map((o) => ({ address: o.address.trim(), percentage: o.percentage })),
-      delay_hours: payload.delay_hours,
-    },
-  });
-
-  if (error) throw new Error(error.message || "Failed to create session");
-  if (data?.error) throw new Error(data.error);
-  if (!data?.session) throw new Error("Invalid response from server");
-
-  return data.session as MixSessionResponse;
+interface MixSessionEnvelope {
+  session: MixSessionResponse;
 }
 
-export async function lookupMixSession(sessionCode: string): Promise<MixSessionResponse> {
-  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-  const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-  const res = await fetch(
-    `https://${projectId}.supabase.co/functions/v1/mix-session?session_code=${encodeURIComponent(sessionCode)}`,
+export async function createMixSession(
+  payload: CreateMixSessionPayload,
+): Promise<MixSessionResponse> {
+  const data = await httpClient.post<MixSessionEnvelope | MixSessionResponse>(
+    endpoints.mixSessions.create(),
     {
-      method: "GET",
-      headers: {
-        apikey: anonKey,
-        Authorization: `Bearer ${anonKey}`,
-      },
+      currency: payload.currency,
+      amount: payload.amount,
+      outputs: payload.outputs.map((o) => ({
+        address: o.address.trim(),
+        percentage: o.percentage,
+      })),
+      delay_hours: payload.delay_hours,
     },
   );
 
-  const json = await res.json();
-  if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
-  if (!json.session) throw new Error("Session not found");
+  const session =
+    (data as MixSessionEnvelope).session ?? (data as MixSessionResponse);
+  if (!session || typeof session !== "object" || !("session_code" in session)) {
+    throw new Error("Invalid response from server");
+  }
+  return session;
+}
 
-  return json.session as MixSessionResponse;
+export async function lookupMixSession(
+  sessionCode: string,
+): Promise<MixSessionResponse> {
+  const data = await httpClient.get<MixSessionEnvelope | MixSessionResponse>(
+    endpoints.mixSessions.byCode(sessionCode),
+  );
+
+  const session =
+    (data as MixSessionEnvelope).session ?? (data as MixSessionResponse);
+  if (!session || typeof session !== "object" || !("session_code" in session)) {
+    throw new Error("Session not found");
+  }
+  return session;
 }
