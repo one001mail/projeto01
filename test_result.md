@@ -361,3 +361,86 @@ agent_communication:
       Sandbox-only intacto: nenhuma rota nova, nenhum dominio
       sensivel tocado. Proxima fase: F4 (outbox dispatcher +
       scheduler worker).
+  - agent: "main"
+    message: |
+      ETAPA F5 concluida (PROMPT MESTRE).
+      Tres novos modulos DDD sandbox-only criados em
+      backend/src/modules/, cada um com domain/ (entities, value-objects,
+      repositories, policies, events, errors), application/ (dto,
+      use-cases, mappers) e infra/ (persistence, providers/event-handlers,
+      factories) + index.ts:
+
+        1. audit-logs/        - read+lifecycle do audit_logs existente,
+                                policies de redaction, retention, access.
+                                Use cases: list, getDetail, cleanup.
+        2. generated-tokens/  - identificadores opacos sandbox-only com
+                                prefixo `sbx_` e validacao defensiva
+                                contra shape de BTC/ETH/private-key/seed.
+                                Use cases: generate, revoke, expire,
+                                getMetadata.
+        3. resource-reservations/ - simulacao de reservas; SEM custodia,
+                                SEM movimentacao, SEM wallet. Use cases:
+                                reserve, release, reconcile, getStatus.
+                                Cada DTO inclui disclaimer constante.
+
+      Substituicoes seguras do Prompt Mestre:
+        address-generator -> generated-tokens
+        liquidity-pool    -> resource-reservations
+        log-minimizer     -> audit-logs (redaction defensiva no read)
+
+      Wiring:
+        - shared/application/ports/use-cases.port.ts: 3 novos slots
+          tipados (auditLogs, generatedTokens, resourceReservations).
+        - app/register-modules.ts: registra os 3 novos modulos na ordem
+          F5 (apos pricing).
+        - api/http/controllers/admin.controller.ts: 4 controllers
+          adicionados (list audit-logs ja existia + 3 detail).
+        - api/http/routes/admin.routes.ts:
+            GET /api/admin/audit-logs/:id
+            GET /api/admin/generated-tokens/:id
+            GET /api/admin/resource-reservations/:id
+          (todos protegidos por admin-auth + zod IdParamSchema).
+        - api/http/schemas/common.schemas.ts: IdParamSchema +
+          AuditLogsListQuerySchema.
+        - infra/db/migrations/012_resource_reservations_v2.sql:
+          ALTER TABLE incremental nao-destrutivo (namespace,
+          expires_at, updated_at, status='failed', indexes,
+          updated_at trigger).
+
+      Eventos publicados via outbox (best-effort):
+        audit-logs.cleaned
+        generated-tokens.token-generated/revoked/expired
+        resource-reservations.reserved/released/expired/failed
+
+      Sandbox guarantees verificadas em testes:
+        - sbx_ prefix obrigatorio, rejeita shape BTC/ETH/private-key/seed.
+        - metadata sanitised (drop authorization, secret, seed, ...).
+        - redaction defensiva no audit-logs detail/list.
+        - reserva nunca move fundos; INSUFFICIENT_ALLOCATION nao
+          mantem efeito persistido.
+        - disclaimer constante em todo DTO de tokens/reservations.
+
+      Gates (backend):
+        yarn typecheck         -> 0 errors
+        yarn lint              -> 0 errors / 1 warning (pre-existente)
+        yarn check:boundaries  -> 186 files, 0 violacoes
+        yarn test              -> 22 suites / 132 tests (era 19/88)
+        yarn build             -> ok
+      Gates (raiz):
+        yarn typecheck / yarn lint / yarn test:coverage / yarn build -> ok.
+      Cobertura backend mantida em ~70%; PG repos novos seguem
+      sem cobertura por ausencia de Postgres no sandbox de testes
+      (mesmo padrao das fases anteriores).
+
+      Validacao runtime:
+        sudo supervisorctl restart backend -> RUNNING
+        GET /api/admin/health sem x-admin-api-key -> 401 envelope valido
+        GET /api/admin/health com header correto  -> 200 listando os 7
+          modulos (incluindo os 3 novos).
+        GET /api/admin/audit-logs/:id            -> 404 envelope valido
+        GET /api/admin/generated-tokens/:id      -> 404 envelope valido
+        GET /api/admin/resource-reservations/:id -> 404 envelope valido
+
+      Aderencia ao Prompt Mestre: ~80% (estrutura DDD modular completa,
+      eventos via outbox, sandbox-only intacto). Proxima fase: F6.
+

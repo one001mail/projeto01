@@ -12,9 +12,12 @@
  */
 import type { FastifyInstance } from 'fastify';
 import { registerTemplateModule } from '../modules/_template/index.js';
+import { registerAuditLogsModule } from '../modules/audit-logs/index.js';
 import { registerContactRequestsModule } from '../modules/contact-requests/index.js';
+import { registerGeneratedTokensModule } from '../modules/generated-tokens/index.js';
 import { registerLearningSessionsModule } from '../modules/learning-sessions/index.js';
 import { registerPricingModule } from '../modules/pricing/index.js';
+import { registerResourceReservationsModule } from '../modules/resource-reservations/index.js';
 
 export interface RegisteredModule {
   readonly name: string;
@@ -26,6 +29,10 @@ const MODULES: readonly RegisteredModule[] = [
   { name: 'learning-sessions', register: registerLearningSessionsModule },
   { name: 'contact-requests', register: registerContactRequestsModule },
   { name: 'pricing', register: registerPricingModule },
+  // F5 — sandbox-only DDD modules.
+  { name: 'audit-logs', register: registerAuditLogsModule },
+  { name: 'generated-tokens', register: registerGeneratedTokensModule },
+  { name: 'resource-reservations', register: registerResourceReservationsModule },
   // Future bounded contexts go here. Each must:
   //   - depend only on its own `domain/`, `application/`, `infra/`
   //   - communicate cross-module exclusively via the event bus / outbox

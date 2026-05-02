@@ -65,3 +65,25 @@ export const ErrorEnvelopeSchema = z.object({
   }),
 });
 export type ErrorEnvelope = z.infer<typeof ErrorEnvelopeSchema>;
+
+/**
+ * URL-style id parameter — `:id` segments are validated as UUIDs by every
+ * admin detail endpoint that surfaces a single aggregate (audit-log,
+ * generated-token, resource-reservation).
+ */
+export const IdParamSchema = z.object({ id: UuidSchema }).strict();
+export type IdParam = z.infer<typeof IdParamSchema>;
+
+/**
+ * Filter-aware list query for admin endpoints that support optional
+ * `scope` / `action` selectors (currently only `audit-logs`).
+ */
+export const AuditLogsListQuerySchema = z
+  .object({
+    limit: z.coerce.number().int().positive().max(500).optional(),
+    offset: z.coerce.number().int().nonnegative().optional(),
+    scope: z.string().min(1).max(64).optional(),
+    action: z.string().min(1).max(200).optional(),
+  })
+  .strict();
+export type AuditLogsListQuery = z.infer<typeof AuditLogsListQuerySchema>;
