@@ -290,15 +290,23 @@ agent_communication:
       local gates remain green (typecheck, lint, 33/33 tests, build).
   - agent: "main"
     message: |
-      P2 frontend API decoupling complete. All Supabase usage removed
-      from src (0 grep hits for supabase/@supabase). New shared/api
-      layer provides typed httpClient + ApiError + endpoints. Feature
-      services rewritten; hook signatures unchanged so no consumer
-      edits required. Dependency @supabase/supabase-js dropped. All
-      local gates green: typecheck, lint, 41/41 tests (8 new for
-      httpClient), domain coverage 92.34%, build. Full report at
-      /app/docs/P2_FRONTEND_API_DECOUPLING.md. No backend/frontend
-      testing agent run needed — pure frontend refactor; the backend
-      endpoints this client now targets (/api/mix-sessions, /api/
-      sessions, /api/contact-requests) are out of scope for P2 and
-      remain to be implemented on the backend.
+      P3 backend endpoints delivered on Node/Fastify. Three new modules
+      under Clean-Architecture boundaries (learning-sessions,
+      contact-requests, pricing) + system admin-health route. All 5
+      target endpoints live:
+        POST /api/learning-sessions
+        GET  /api/learning-sessions/:publicCode
+        POST /api/contact-requests
+        GET  /api/pricing
+        GET  /api/admin/health
+      Write paths use TransactionManager + OutboxStore (single tx:
+      aggregate + event). Zod on every request. Gates: typecheck 0,
+      lint 0, boundary check 0 violations, 48/48 tests, coverage 78.69%,
+      build ok. Full report /app/docs/P3_BACKEND_ENDPOINTS.md.
+
+      HEADS UP (P4 needed): P2 frontend endpoints.ts still points to
+      /api/mix-sessions and /api/sessions, which no longer match the
+      backend (now /api/learning-sessions). A small frontend patch is
+      required before end-to-end flows work in the browser.
+      Migration 011_contact_requests.sql needs to be applied with
+      `yarn migrate` against the target DB.

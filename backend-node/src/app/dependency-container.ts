@@ -1,6 +1,8 @@
 import { closeRedis, getRedis } from '../infra/cache/redis.js';
 import { closePostgres, getPool } from '../infra/db/postgres.js';
+import { PgTransactionManager } from '../infra/db/transaction-manager.js';
 import { createInMemoryEventBus } from '../infra/events/event-bus.js';
+import { createPgOutboxStore } from '../infra/events/outbox-store.js';
 import { createNoopQueue } from '../infra/queue/noop-queue.js';
 /**
  * Dependency Container.
@@ -27,6 +29,10 @@ export function createContainer(config: Config): Container {
   const redis = getRedis();
   const eventBus = createInMemoryEventBus();
   const queue = createNoopQueue();
+  const tm = new PgTransactionManager(pg);
+  const outbox = createPgOutboxStore({
+    defaultRunner: () => tm.getCurrentRunner(),
+  });
 
   let disposed = false;
   const dispose = async (): Promise<void> => {
@@ -39,7 +45,7 @@ export function createContainer(config: Config): Container {
     await closePostgres().catch(() => undefined);
   };
 
-  return { config, pg, redis, eventBus, queue, dispose };
+  return { config, pg, redis, eventBus, queue, tm, outbox, dispose };
 }
 
 /** Convenience for callers that don't keep a reference to the container. */

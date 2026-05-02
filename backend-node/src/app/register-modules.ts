@@ -12,6 +12,9 @@
  */
 import type { FastifyInstance } from 'fastify';
 import { registerTemplateModule } from '../modules/_template/index.js';
+import { registerContactRequestsModule } from '../modules/contact-requests/index.js';
+import { registerLearningSessionsModule } from '../modules/learning-sessions/index.js';
+import { registerPricingModule } from '../modules/pricing/index.js';
 
 export interface RegisteredModule {
   readonly name: string;
@@ -20,6 +23,9 @@ export interface RegisteredModule {
 
 const MODULES: readonly RegisteredModule[] = [
   { name: '_template', register: registerTemplateModule },
+  { name: 'learning-sessions', register: registerLearningSessionsModule },
+  { name: 'contact-requests', register: registerContactRequestsModule },
+  { name: 'pricing', register: registerPricingModule },
   // Future bounded contexts go here. Each must:
   //   - depend only on its own `domain/`, `application/`, `infra/`
   //   - communicate cross-module exclusively via the event bus / outbox

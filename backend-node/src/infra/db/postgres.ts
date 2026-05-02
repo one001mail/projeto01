@@ -23,11 +23,7 @@ export function getPool(): Pool {
   };
 
   pool = new Pool(opts);
-  pool.on('error', (err) => {
-    // Keep this raw — the app logger may not be in scope here.
-    // eslint-disable-next-line no-console
-    console.error('postgres pool error', err);
-  });
+  pool.on('error', (_err) => {});
   return pool;
 }
 
