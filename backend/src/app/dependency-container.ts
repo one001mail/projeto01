@@ -1,7 +1,6 @@
 import { InMemoryAuditLogStore } from '../infra/audit/in-memory-audit-log.store.js';
 import { createPgAuditLogStore } from '../infra/audit/pg-audit-log.store.js';
 import { closeRedis, getRedis } from '../infra/cache/redis.js';
-import { NoopTransactionManager } from '../infra/db/noop-transaction-manager.js';
 import { closePostgres, getPool } from '../infra/db/postgres.js';
 import { probePostgres } from '../infra/db/probe-postgres.js';
 import { PgTransactionManager } from '../infra/db/transaction-manager.js';
@@ -13,6 +12,7 @@ import { createPgOutboxStore } from '../infra/events/outbox-store.js';
 import { InMemoryIdempotencyStore } from '../infra/idempotency/in-memory-idempotency.store.js';
 import { createPgIdempotencyStore } from '../infra/idempotency/pg-idempotency.store.js';
 import { createNoopQueue } from '../infra/queue/noop-queue.js';
+import { createUseCaseRegistry } from '../shared/application/ports/use-cases.port.js';
 /**
  * Dependency Container.
  *
@@ -96,6 +96,7 @@ export async function createContainer(config: Config): Promise<Container> {
     inbox,
     idempotency,
     auditLog,
+    useCases: createUseCaseRegistry(),
     sandboxFallback,
     dispose,
   };

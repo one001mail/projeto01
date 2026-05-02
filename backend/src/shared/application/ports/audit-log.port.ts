@@ -36,6 +36,32 @@ export interface AuditLogEntry {
   readonly actorId?: string;
 }
 
+export interface AuditLogRecord extends AuditLogEntry {
+  /** Persistent identifier (uuid for PG; sequence for in-memory). */
+  readonly id: string;
+  /** ISO timestamp when the row was inserted. */
+  readonly createdAt: string;
+}
+
+export interface AuditLogListQuery {
+  /** Maximum rows to return. Implementations must clamp to a safe ceiling. */
+  readonly limit?: number;
+  /** Offset for pagination. */
+  readonly offset?: number;
+  /** Optional filter on `scope`. */
+  readonly scope?: string;
+  /** Optional filter on `action`. */
+  readonly action?: string;
+}
+
+export interface AuditLogListResult {
+  readonly entries: readonly AuditLogRecord[];
+  /** Total matching rows ignoring limit/offset. */
+  readonly total: number;
+  readonly limit: number;
+  readonly offset: number;
+}
+
 export interface AuditLogStore {
   /**
    * Appends one entry. Must NOT throw on transient infra failure: callers
@@ -43,4 +69,11 @@ export interface AuditLogStore {
    * SHOULD log the error and degrade silently.
    */
   record(entry: AuditLogEntry): Promise<void>;
+
+  /**
+   * Reads recent entries, newest first. Used by `GET /api/admin/audit-logs`.
+   * Returns a deterministic page of records and the total count for the
+   * filter. Caller MUST be authenticated (admin auth middleware).
+   */
+  list(query?: AuditLogListQuery): Promise<AuditLogListResult>;
 }

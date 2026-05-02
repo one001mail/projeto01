@@ -33,6 +33,10 @@ export async function registerLearningSessionsModule(app: FastifyInstance): Prom
   });
   const getUc = new GetLearningSessionUseCase(repo);
 
+  // Expose use cases through the shared registry so the api/http layer can
+  // call them through ports without importing this module directly.
+  app.ctx.useCases.mixSession = { create: createUc, get: getUc };
+
   await app.register(
     async (api) => {
       // Idempotency middleware applies to mutating routes in this module.

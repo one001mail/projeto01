@@ -20,6 +20,7 @@ import type { EventBus } from '../shared/application/ports/event-bus.port.js';
 import type { IdempotencyStore } from '../shared/application/ports/idempotency-store.port.js';
 import type { QueuePort } from '../shared/application/ports/queue.port.js';
 import type { TransactionManager } from '../shared/application/ports/transaction-manager.port.js';
+import type { UseCaseRegistry } from '../shared/application/ports/use-cases.port.js';
 import type { Config } from './config.js';
 
 export interface AppContext {
@@ -33,6 +34,12 @@ export interface AppContext {
   readonly inbox: InboxStore;
   readonly idempotency: IdempotencyStore;
   readonly auditLog: AuditLogStore;
+  /**
+   * Mutable bag populated by domain modules during their `register*Module()`
+   * plugin. The shared HTTP layer (`src/api/http/routes/*`) consumes use
+   * cases from here through ports; modules remain the source of truth.
+   */
+  readonly useCases: UseCaseRegistry;
   /**
    * True when the container elected the sandbox fallback path:
    * PG probe failed, `SANDBOX_ONLY=true`, and `NODE_ENV !== 'production'`.

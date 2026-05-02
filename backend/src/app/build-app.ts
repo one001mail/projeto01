@@ -46,10 +46,12 @@ export async function buildApp(config: Config): Promise<BuiltApp> {
   // 3. Attach context (decorate before any route reads `app.ctx`)
   attachAppContext(app, container);
 
-  // 4-6. Plugins, system routes, modules
+  // 4. Plugins, then modules, then shared routes.
+  // Shared routes consume use-case ports populated by modules during
+  // `registerModules`, so order is: plugins → modules → routes.
   await registerPlugins(app, config);
-  await registerRoutes(app);
   await registerModules(app);
+  await registerRoutes(app);
 
   // 6.5. Background workers (outbox dispatcher, etc.). Event handler
   //      collection is ready here for future modules that declare

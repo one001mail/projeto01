@@ -25,6 +25,9 @@ export async function registerContactRequestsModule(app: FastifyInstance): Promi
     uuid: new CryptoUuidGenerator(),
   });
 
+  // Expose for the shared HTTP layer via ports.
+  app.ctx.useCases.contact = { submit: submitUc };
+
   await app.register(
     async (api) => {
       await api.register(idempotencyMiddleware, {

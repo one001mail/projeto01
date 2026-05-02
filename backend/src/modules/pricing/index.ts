@@ -9,6 +9,9 @@ import { makePricingRoutes } from './infra/http/routes.js';
 export async function registerPricingModule(app: FastifyInstance): Promise<void> {
   const getUc = new GetPricingUseCase({ clock: new SystemClock() });
 
+  // Expose for the shared HTTP layer via ports.
+  app.ctx.useCases.pricing = { get: getUc };
+
   await app.register(
     async (api) => {
       await api.register(makePricingRoutes({ getUc }));
