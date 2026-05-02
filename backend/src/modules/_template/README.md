@@ -27,7 +27,7 @@ modules/<name>/
    adapters to ports, registers HTTP routes, subscribes to events.
 
 All five rules are verified on every push by
-`backend-node/tools/check-boundaries.ts`
+`backend/tools/check-boundaries.ts`
 (`npm run check:boundaries`). See the top-level `architecture.md` for
 the full matrix.
 

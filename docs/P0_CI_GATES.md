@@ -11,7 +11,7 @@ hard gates as separate jobs (failure of any single job fails the run):
 
 | Job         | Command                                               | Hard gate                                 |
 | ----------- | ----------------------------------------------------- | ----------------------------------------- |
-| `typecheck` | `yarn typecheck` (frontend + backend-node)            | TS strict mode — zero `tsc` errors        |
+| `typecheck` | `yarn typecheck` (frontend + backend)            | TS strict mode — zero `tsc` errors        |
 | `lint`      | `yarn lint` (ESLint + Biome)                          | Zero lint errors                          |
 | `test`      | `yarn test:coverage` (Vitest with `--coverage`)       | Tests pass & coverage threshold ≥ 60%     |
 | `build`     | `yarn build` (Vite + tsc) — gated on previous 3 jobs  | Production bundle builds cleanly          |
@@ -42,7 +42,7 @@ Frontend (`frontend/package.json`):
 - `yarn test:coverage` → `vitest run --coverage`
 - `yarn build`     → `vite build`
 
-Backend-node (`backend-node/package.json`):
+Backend-node (`backend/package.json`):
 
 - `yarn typecheck` → `tsc --noEmit`
 - `yarn lint`      → `biome check src`
@@ -57,7 +57,7 @@ Backend-node (`backend-node/package.json`):
 `strict: true`, `noImplicitAny: true`, `strictNullChecks: true`. Was
 previously `false` across the board.
 
-### Backend-node (`backend-node/tsconfig.json`)
+### Backend-node (`backend/tsconfig.json`)
 
 Already strict (`strict`, `noImplicitAny`, `noImplicitOverride`,
 `noFallthroughCasesInSwitch`, `noUncheckedIndexedAccess`,
@@ -70,7 +70,7 @@ $ yarn typecheck
 $ yarn typecheck:frontend && yarn typecheck:backend
 $ cd frontend && yarn typecheck
 $ tsc -b --noEmit
-$ cd backend-node && yarn typecheck
+$ cd backend && yarn typecheck
 $ tsc --noEmit
 Done in 13.92s.
 exit=0
@@ -106,7 +106,7 @@ Threshold (`>= 60%` per `vitest.config.ts`) is enforced at runtime —
 | Branches   | **77.39** |
 
 7 test files / 25 tests, all passing. HTML, lcov, json-summary reports
-under `backend-node/coverage/`.
+under `backend/coverage/`.
 
 ## 5. Lint
 
@@ -115,7 +115,7 @@ Both linters report **zero errors**:
 - ESLint (frontend): 0 errors, 7 warnings (all pre-existing
   `react-refresh/only-export-components` informational notices on
   shadcn/ui primitives — these are warnings only).
-- Biome (backend-node): 0 errors, 1 warning (a single `console.error`
+- Biome (backend): 0 errors, 1 warning (a single `console.error`
   in the pg-pool fallback path; intentionally kept and pre-existing).
 
 CI fails on errors only; warnings do not break the build.
@@ -132,7 +132,7 @@ dist/index.html                   1.69 kB │ gzip:   0.67 kB
 dist/assets/index-*.css          62.88 kB │ gzip:  11.13 kB
 dist/assets/index-*.js          708.42 kB │ gzip: 207.78 kB
 ✓ built in 6.48s
-$ cd backend-node && yarn build
+$ cd backend && yarn build
 $ tsc -p tsconfig.build.json && node -e "...migrations copy..."
 Done in 11.13s.
 exit=0
@@ -145,7 +145,7 @@ $ yarn ci
 $ yarn typecheck && yarn lint && yarn test:coverage && yarn build
 …
 All files (frontend)     |   92.34 |    86.36 |   81.81 |   92.34 |
-All files (backend-node) |   63.43 |    77.39 |   78.72 |   63.43 |
+All files (backend) |   63.43 |    77.39 |   78.72 |   63.43 |
 …
 Done in 44.32s.
 exit=0
@@ -156,7 +156,7 @@ exit=0
 - [x] CI configured (`.github/workflows/ci.yml`)
 - [x] `yarn typecheck`, `yarn lint`, `yarn test`, `yarn build` scripts
       (and `yarn test:coverage`, `yarn ci`)
-- [x] TS strict mode enforced — frontend + backend-node
+- [x] TS strict mode enforced — frontend + backend
 - [x] Coverage report generated (`vitest --coverage`) — both packages
 - [x] coverage ≥ 60% in every dimension on both packages (initial)
 - [x] no TS errors

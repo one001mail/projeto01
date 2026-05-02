@@ -2,7 +2,7 @@
 
 This repository follows **Clean Architecture + Domain-Driven Design +
 Hexagonal (Ports & Adapters)**. The rules below are enforced
-mechanically by `backend-node/tools/check-boundaries.ts` and run in CI
+mechanically by `backend/tools/check-boundaries.ts` and run in CI
 (`.github/workflows/architecture.yml`). Any PR that violates them fails
 the build.
 
@@ -14,7 +14,7 @@ the build.
 
 ## 1. Layers
 
-Every file under `backend-node/src/` is classified into exactly one
+Every file under `backend/src/` is classified into exactly one
 layer based on its path:
 
 | Path pattern                                   | Layer                | Purpose                                                                    |
@@ -149,12 +149,12 @@ modules/<name>/
 └─ index.ts          composition: registerModule(app) Fastify plugin
 ```
 
-See `backend-node/src/modules/_template/` for a working reference.
+See `backend/src/modules/_template/` for a working reference.
 
 To add a new bounded context:
 
 ```bash
-cp -r backend-node/src/modules/_template backend-node/src/modules/<name>
+cp -r backend/src/modules/_template backend/src/modules/<name>
 # 1. rename symbols
 # 2. register in src/app/register-modules.ts
 # 3. `npm run check:boundaries && npm run typecheck && npm test`
@@ -167,7 +167,7 @@ cp -r backend-node/src/modules/_template backend-node/src/modules/<name>
 ### Local
 
 ```bash
-cd backend-node
+cd backend
 npm run check:boundaries   # ✓ no boundary violations
 npm run check:arch         # boundaries + typecheck
 npm run lint               # biome (style + dead-code safety-net)
@@ -206,7 +206,7 @@ A PR cannot merge unless all three architecture gates pass.
 
 When you add a layer, update **two** places together:
 
-1. `backend-node/tools/check-boundaries.ts` — classifier + matrix.
+1. `backend/tools/check-boundaries.ts` — classifier + matrix.
 2. `architecture.md` — the tables in sections 1 and 2.
 
 The boundary checker is the source of truth; `architecture.md` is its

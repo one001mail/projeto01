@@ -4,12 +4,12 @@ on:
   push:
     branches: [main, master]
     paths:
-      - 'backend-node/**'
+      - 'backend/**'
       - 'architecture.md'
       - '.github/workflows/architecture.yml'
   pull_request:
     paths:
-      - 'backend-node/**'
+      - 'backend/**'
       - 'architecture.md'
       - '.github/workflows/architecture.yml'
 
@@ -19,27 +19,25 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend-node
+        working-directory: backend
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: backend-node/package-lock.json
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: yarn install --frozen-lockfile || yarn install
 
       # Hard gate: boundary violations fail the build immediately.
       - name: Boundary check (domain / application / infra)
-        run: npm run check:boundaries
+        run: yarn check:boundaries
 
       # Hard gate: layer moves that slip past regex checking show up here.
       - name: Typecheck
-        run: npm run typecheck
+        run: yarn typecheck
 
       # Hard gate: enforcement script + module behaviour tests.
       - name: Tests
-        run: npm test
+        run: yarn test

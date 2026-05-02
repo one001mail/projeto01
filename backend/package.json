@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "dev:no-watch": "tsx src/index.ts",
     "build": "tsc -p tsconfig.build.json && node -e \"require('node:fs').cpSync('src/infra/db/migrations','dist/infra/db/migrations',{recursive:true})\"",
     "start": "node dist/index.js",
     "test": "vitest run",

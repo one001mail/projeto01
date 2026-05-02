@@ -39,7 +39,7 @@ Each future module under `modules/` follows the Clean Architecture rule:
 ```bash
 cp .env.example .env
 npm install
-npm run dev          # http://localhost:8080/health
+npm run dev          # http://localhost:8081/health
 ```
 
 You do **not** need Postgres or Redis running for the foundation — connections are lazy and the
@@ -50,7 +50,7 @@ health endpoint reports their state.
 ```bash
 cp .env.example .env
 docker compose up --build
-# api → http://localhost:8080
+# api → http://localhost:8081
 # postgres → localhost:5432 (app/app)
 # redis    → localhost:6379
 ```

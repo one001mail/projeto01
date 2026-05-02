@@ -15,7 +15,7 @@ RUN npm install --no-audit --no-fund
 FROM base AS dev
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-EXPOSE 8080
+EXPOSE 8081
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["npx", "tsx", "watch", "src/index.ts"]
 
@@ -35,6 +35,6 @@ COPY package.json ./
 RUN npm install --omit=dev --no-audit --no-fund && npm cache clean --force
 COPY --from=build /app/dist ./dist
 USER app
-EXPOSE 8080
+EXPOSE 8081
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "dist/index.js"]

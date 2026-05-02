@@ -310,3 +310,28 @@ agent_communication:
       required before end-to-end flows work in the browser.
       Migration 011_contact_requests.sql needs to be applied with
       `yarn migrate` against the target DB.
+  - agent: "main"
+    message: |
+      ETAPA F1+F2 concluida (PROMPT MESTRE).
+      F1 - Migracao estrutural: 112 arquivos movidos via `git mv` de
+      `backend-node/` para `backend/`. Diretorio `backend-node/`
+      removido. Stub Python original (server.py + requirements.txt)
+      removido. Todas as referencias a `backend-node` em
+      package.json (raiz), .github/workflows/ci.yml, architecture.yml,
+      architecture.md, docs/P0_CI_GATES.md e backend/src/modules/_template
+      atualizadas para `backend/`.
+      F2 - Shim Python/FastAPI: criado `/app/backend/server.py` como
+      reverse-proxy puro (sem business logic) para Fastify em
+      127.0.0.1:8081, mantendo o supervisord read-only feliz.
+      Adicionados `requirements.txt` (fastapi/uvicorn/httpx) e
+      `scripts/start-shim.sh`. Backend Fastify: HOST default 0.0.0.0,
+      PORT default 8081 (era 8080); Dockerfile/docker-compose
+      atualizados; novo script `dev:no-watch` no package.json.
+      Validacao: `sudo supervisorctl restart backend` -> RUNNING.
+      Curl externo (preview Emergent) em /api/pricing -> 200 OK.
+      `/api/admin/health` -> 503 (degraded por ausencia de PG/Redis,
+      esperado). Health-shim probe -> 200 com upstream:ok.
+      Gates raiz: yarn typecheck 0, yarn lint 0 errors,
+      yarn test:coverage 48/48 tests passa, yarn build ok.
+      Sandbox-only: nenhum endpoint sensivel implementado. Proxima
+      fase: F3 (idempotency + audit-log + admin-auth middlewares).
