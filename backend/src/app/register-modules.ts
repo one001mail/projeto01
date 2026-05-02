@@ -12,10 +12,16 @@
  */
 import type { FastifyInstance } from 'fastify';
 import { registerTemplateModule } from '../modules/_template/index.js';
+import { registerAddressGeneratorModule } from '../modules/address-generator/index.js';
 import { registerAuditLogsModule } from '../modules/audit-logs/index.js';
+import { registerBlockchainMonitorModule } from '../modules/blockchain-monitor/index.js';
 import { registerContactRequestsModule } from '../modules/contact-requests/index.js';
+import { registerDepositSagaModule } from '../modules/deposit-saga/index.js';
 import { registerGeneratedTokensModule } from '../modules/generated-tokens/index.js';
 import { registerLearningSessionsModule } from '../modules/learning-sessions/index.js';
+import { registerLiquidityPoolModule } from '../modules/liquidity-pool/index.js';
+import { registerLogMinimizerModule } from '../modules/log-minimizer/index.js';
+import { registerPaymentSchedulerModule } from '../modules/payment-scheduler/index.js';
 import { registerPricingModule } from '../modules/pricing/index.js';
 import { registerResourceReservationsModule } from '../modules/resource-reservations/index.js';
 
@@ -26,6 +32,7 @@ export interface RegisteredModule {
 
 const MODULES: readonly RegisteredModule[] = [
   { name: '_template', register: registerTemplateModule },
+  // Existing sandbox-safe bounded contexts.
   { name: 'learning-sessions', register: registerLearningSessionsModule },
   { name: 'contact-requests', register: registerContactRequestsModule },
   { name: 'pricing', register: registerPricingModule },
@@ -33,9 +40,16 @@ const MODULES: readonly RegisteredModule[] = [
   { name: 'audit-logs', register: registerAuditLogsModule },
   { name: 'generated-tokens', register: registerGeneratedTokensModule },
   { name: 'resource-reservations', register: registerResourceReservationsModule },
-  // Future bounded contexts go here. Each must:
-  //   - depend only on its own `domain/`, `application/`, `infra/`
-  //   - communicate cross-module exclusively via the event bus / outbox
+  // F6 — master-prompt compatibility modules (SANDBOX/MOCK ONLY).
+  // These mirror the naming expected by the MASTER PROMPT while preserving
+  // the sandbox contract: no real blockchain access, no wallet generation,
+  // no custody, no payment execution.
+  { name: 'address-generator', register: registerAddressGeneratorModule },
+  { name: 'blockchain-monitor', register: registerBlockchainMonitorModule },
+  { name: 'deposit-saga', register: registerDepositSagaModule },
+  { name: 'liquidity-pool', register: registerLiquidityPoolModule },
+  { name: 'log-minimizer', register: registerLogMinimizerModule },
+  { name: 'payment-scheduler', register: registerPaymentSchedulerModule },
 ];
 
 export async function registerModules(app: FastifyInstance): Promise<void> {

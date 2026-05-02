@@ -82,3 +82,28 @@ When `SANDBOX_ONLY=true` and PG probe fails:
 - `src/infra/events/event-bus.ts`
 - `src/infra/events/register-event-handlers.ts`
 - `src/app/workers.ts`
+
+
+
+## Master-prompt compatibility flow (SANDBOX / MOCK ONLY)
+
+For architectural parity with the MASTER PROMPT, the following **mock**
+event chain is emitted by the F6 sandbox modules. **Every payload carries
+`sandbox: true` and every semantic field relating to crypto is clearly
+mocked (`mockSessionId`, `mockTxid`, `mock: true`, `notAPayout: true`,
+`notAWallet: true`).**
+
+```
+blockchain-monitor.deposit-detected            ── mock observation
+    └─> deposit-saga.started                    ── mock saga
+          ├─> liquidity-pool.liquidity-reserved ── mock reservation
+          ├─> address-generator.address-generated ── mock sbx_ token
+          ├─> payment-scheduler.payment-scheduled ── mock payout preview
+          └─> log-minimizer.logs-minimized       ── retention-driven
+                                                    cleanup
+```
+
+None of these events imply a real-world side effect. The chain exists to
+demonstrate how a production system would compose bounded contexts;
+every node in the chain is an in-memory stub gated by the sandbox
+contract.

@@ -1,5 +1,23 @@
 # Backend
 
+> ⚠️ **Important Safety Notice**
+>
+> This backend is an **educational sandbox**. It does **not** implement real
+> cryptocurrency mixing, custody, wallet generation, blockchain monitoring,
+> transaction broadcasting, liquidity movement, or payment execution. Every
+> sensitive flow is **mock-only** and **non-operational**. The codebase
+> demonstrates architectural patterns (DDD, Clean Architecture, outbox,
+> idempotency, audit redaction) — **not** an operational mixer.
+>
+> The following modules under `src/modules/` are explicitly **SANDBOX /
+> MOCK-ONLY**, and must remain so:
+> `address-generator`, `blockchain-monitor`, `deposit-saga`,
+> `liquidity-pool`, `log-minimizer`, `payment-scheduler`.
+>
+> See `docs/modules/*.md` for the per-module safety contract.
+
+
+
 Modular **Node.js + TypeScript** backend built on **Fastify**, following Clean
 Architecture / DDD layout. Bootstrapped under a thin Python/FastAPI compatibility
 shim (`server.py`) so it can run inside the read-only `supervisord` of the
