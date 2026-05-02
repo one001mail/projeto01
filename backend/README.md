@@ -1,9 +1,9 @@
 # Backend
 
-Modular Node.js + TypeScript backend built on Fastify, following Clean Architecture / DDD layout.
-This directory contains **the foundation only** (Phase B1): bootstrap, config, logging, error
-handling, and a health endpoint. Domain modules and infrastructure adapters are scaffolded but
-not yet implemented — they are introduced in subsequent phases.
+Modular **Node.js + TypeScript** backend built on **Fastify**, following Clean
+Architecture / DDD layout. Bootstrapped under a thin Python/FastAPI compatibility
+shim (`server.py`) so it can run inside the read-only `supervisord` of the
+preview environment without changing the supervisor config.
 
 ## Stack
 
@@ -19,31 +19,93 @@ not yet implemented — they are introduced in subsequent phases.
 | Lint / format  | Biome                             |
 | Container      | Docker + docker-compose           |
 
-## Layout
+## Mandatory layout
 
 ```
-src/
-├─ index.ts          # process entry point
-├─ app/              # composition root: config, server build, lifecycle
-├─ api/              # HTTP adapter: routes, controllers, schemas, presenters
-├─ infra/            # framework / driver code: db, cache, logging, etc.
-├─ modules/          # bounded contexts (domain + application + infra-per-module)
-└─ shared/           # cross-cutting kernels: errors, types, utilities
+backend/
+├─ package.json
+├─ tsconfig.json
+├─ tsconfig.build.json
+├─ .env.example
+├─ .gitignore
+├─ biome.json
+├─ vitest.config.ts
+├─ docker-compose.yml
+├─ Dockerfile
+├─ README.md
+├─ docs/
+│  ├─ architecture-overview.md
+│  ├─ module-dependencies.md
+│  ├─ event-flow.md
+│  ├─ security-model.md
+│  ├─ privacy-model.md
+│  ├─ logging-retention.md
+│  └─ modules/
+├─ src/
+│  ├─ index.ts                     # process entrypoint
+│  ├─ api/                         # HTTP adapter (routes, controllers, middlewares, schemas, presenters)
+│  ├─ app/                         # composition root
+│  │  ├─ build-app.ts
+│  │  ├─ register-plugins.ts
+│  │  ├─ register-routes.ts
+│  │  ├─ register-modules.ts
+│  │  ├─ app-context.ts
+│  │  ├─ dependency-container.ts
+│  │  ├─ config.ts
+│  │  ├─ lifecycle.ts
+│  │  └─ workers.ts
+│  ├─ infra/                       # shared adapters: pg, redis, events, queue, audit, idempotency, ...
+│  ├─ modules/                     # bounded contexts (domain + application + infra-per-module)
+│  └─ shared/                      # cross-cutting kernels: errors, types, ports, redaction
+└─ tests/
+   ├─ unit/
+   ├─ integration/
+   └─ e2e/
 ```
 
-Each future module under `modules/` follows the Clean Architecture rule:
-`domain` knows nothing, `application` depends on `domain`, `infra` depends on both.
+Inner unit tests stay co-located with source as `src/**/*.test.ts`. The
+`tests/` folder hosts boundary-spanning suites (full Fastify boot via
+`buildApp`).
+
+## Bootstrap (composition root)
+
+Entry: `src/index.ts` → `buildApp(config)`.
+
+1. `loadConfig()` reads `.env`, validates with Zod (`src/app/config.ts`).
+2. `createContainer(config)` builds infra adapters, probes Postgres, picks
+   PG-backed or in-memory stores (sandbox fallback).
+3. Fastify is instantiated with logger / body limits / request id.
+4. `attachAppContext(app, container)` decorates `app.ctx`.
+5. `registerPlugins(app, config)` mounts `sensible`, `helmet`, `cors`,
+   `rate-limit`, the global error handler, and the audit-log middleware.
+6. `registerRoutes(app)` mounts system routes (`/health`, `/api/admin/*`).
+7. `registerModules(app)` invokes every bounded context's `registerModule`
+   plugin.
+8. `startWorkers({...})` boots background workers when `WORKERS_ENABLED=true`.
 
 ## Run — local (without Docker)
 
 ```bash
 cp .env.example .env
-npm install
-npm run dev          # http://localhost:8081/health
+yarn install
+yarn dev          # http://localhost:8081/health
 ```
 
-You do **not** need Postgres or Redis running for the foundation — connections are lazy and the
-health endpoint reports their state.
+You do **not** need Postgres or Redis running for the foundation — connections
+are lazy and the health endpoint reports their state. With `SANDBOX_ONLY=true`
+(default in preview), unreachable PG triggers in-memory adapters.
+
+## Run — under the preview shim
+
+The Emergent preview's `supervisord` invokes:
+
+```
+uvicorn server:app --host 0.0.0.0 --port 8001 --workers 1 --reload
+```
+
+`server.py` is a transparent reverse-proxy that spawns the Node app on
+loopback `127.0.0.1:8081` and forwards every request to it. Curl any path on
+`:8001` and the Fastify response comes back.
 
 ## Run — Docker Compose
 
@@ -57,46 +119,49 @@ docker compose up --build
 
 ## Scripts
 
-| Script                  | Purpose                                       |
-| ----------------------- | --------------------------------------------- |
-| `npm run dev`           | Hot-reload dev server via `tsx watch`         |
-| `npm run build`         | Type-check + emit to `dist/`                  |
-| `npm run start`         | Run compiled output                           |
-| `npm run typecheck`     | `tsc --noEmit`                                |
-| `npm run check:boundaries` | Architecture boundary validator (`tools/check-boundaries.ts`) |
-| `npm run check:arch`    | Boundaries + typecheck (local pre-push gate)  |
-| `npm run lint`          | Biome lint + format check                     |
-| `npm test`              | Run all Vitest suites                         |
-| `npm run test:unit`     | Unit tests only                               |
-| `npm run test:integration` | Integration tests only                     |
-| `npm run test:e2e`      | End-to-end suite under `tests/e2e/`           |
-| `npm run migrate`       | Run SQL migrations (stub in this phase)       |
+| Script                     | Purpose                                                 |
+| -------------------------- | ------------------------------------------------------- |
+| `yarn dev`                 | Hot-reload dev server via `tsx watch`                   |
+| `yarn dev:no-watch`        | Single-process dev server (used by the preview shim)    |
+| `yarn build`               | Type-check + emit to `dist/`                            |
+| `yarn start`               | Run compiled output                                     |
+| `yarn typecheck`           | `tsc --noEmit`                                          |
+| `yarn check:boundaries`    | Architecture boundary validator (`tools/check-boundaries.ts`) |
+| `yarn check:arch`          | Boundaries + typecheck (local pre-push gate)            |
+| `yarn lint`                | Biome lint + format check                               |
+| `yarn lint:fix`            | Biome auto-fix                                          |
+| `yarn test`                | Run all Vitest suites                                   |
+| `yarn test:unit`           | Unit tests only                                         |
+| `yarn test:integration`    | Integration tests only                                  |
+| `yarn test:e2e`            | End-to-end suite under `tests/e2e/`                     |
+| `yarn test:coverage`       | All tests + coverage thresholds                         |
+| `yarn migrate`             | Run SQL migrations                                      |
 
-## Endpoints
+## Endpoints (system)
 
-| Method | Path        | Description                                              |
-| ------ | ----------- | -------------------------------------------------------- |
-| GET    | `/health`   | Liveness + dependency probe (process, db, redis)         |
+| Method | Path                  | Description                                      |
+| ------ | --------------------- | ------------------------------------------------ |
+| GET    | `/health`             | Liveness + dependency probe (process, db, redis) |
+| GET    | `/api/admin/health`   | Same probe gated by `X-Admin-API-Key`            |
 
-## What is real vs stub (phase B1)
+Domain endpoints live under `src/modules/<ctx>/` and are documented per-module
+in [`docs/modules/`](./docs/modules/README.md).
 
-| Piece                        | State |
-| ---------------------------- | ----- |
-| Fastify bootstrap            | real  |
-| Env loading + Zod validation | real  |
-| Pino logger + redaction      | real  |
-| Global error handler         | real  |
-| `/health` endpoint           | real  |
-| Postgres pool                | real client; pings DB only if `DATABASE_URL` is reachable |
-| Redis client                 | real client; ping reported in `/health` |
-| Domain modules               | empty placeholders — added in B2+ |
-| Migrations runner            | stub script — added in B2 |
-| Outbox / event bus           | not yet — added in B3 |
-| Auth / rate-limit / idempotency | scaffolding only — added in B4 |
+## Documentation
 
-## Next phases
+- [`docs/architecture-overview.md`](./docs/architecture-overview.md)
+- [`docs/module-dependencies.md`](./docs/module-dependencies.md)
+- [`docs/event-flow.md`](./docs/event-flow.md)
+- [`docs/security-model.md`](./docs/security-model.md)
+- [`docs/privacy-model.md`](./docs/privacy-model.md)
+- [`docs/logging-retention.md`](./docs/logging-retention.md)
+- [`docs/modules/`](./docs/modules/README.md) — per-module reference
 
-- **B2** — Postgres migrations runner, base repository, outbox table.
-- **B3** — In-memory event bus, domain events, outbox dispatcher.
-- **B4** — Rate limiting, idempotency middleware, request context, auth.
-- **B5** — First real bounded context (domain to be chosen lawfully with the user).
+## Validation checklist
+
+- `yarn typecheck` → 0 errors
+- `yarn lint` → 0 errors
+- `yarn check:boundaries` → 0 violations
+- `yarn test` → all suites green
+- `yarn build` → emits `dist/`
+- `GET /health` → 200, body `{ status, uptimeSeconds, timestamp, version, checks }`

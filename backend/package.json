@@ -16,7 +16,7 @@
     "test:coverage": "vitest run --coverage",
     "test:unit": "vitest run --dir src --exclude '**/*.integration.test.ts' --exclude '**/*.e2e.test.ts'",
     "test:integration": "vitest run --dir src --testNamePattern integration",
-    "test:e2e": "vitest run --dir tests/e2e",
+    "test:e2e": "vitest run tests/e2e",
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
     "typecheck": "tsc --noEmit",
