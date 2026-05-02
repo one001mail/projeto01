@@ -1,6 +1,7 @@
 /**
  * Barrel export for application ports.
  */
+export * from './audit-log.port.js';
 export * from './clock.port.js';
 export * from './domain-event.port.js';
 export * from './event-bus.port.js';

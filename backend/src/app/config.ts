@@ -59,6 +59,40 @@ const ConfigSchema = z.object({
     ),
   LOG_RETENTION_DAYS: z.coerce.number().int().nonnegative().default(7),
 
+  // F3 — admin auth (sandbox-only API-key gate for /api/admin/*)
+  // Optional: when undefined, admin endpoints fail closed with 503.
+  ADMIN_API_KEY: z
+    .string()
+    .min(1)
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined)),
+
+  // F3 — idempotency middleware
+  IDEMPOTENCY_TTL_SECONDS: z.coerce.number().int().positive().default(86_400),
+
+  // F3 — audit-log redaction (dot-paths over the audit payload)
+  AUDIT_REDACT_FIELDS: z
+    .string()
+    .default(
+      [
+        'body.email',
+        'body.message',
+        'body.subject',
+        'body.password',
+        'body.token',
+        'body.metadata_minimized',
+        'headers.authorization',
+        'headers.cookie',
+        'headers.x-admin-api-key',
+      ].join(','),
+    )
+    .transform((s) =>
+      s
+        .split(',')
+        .map((p) => p.trim())
+        .filter(Boolean),
+    ),
+
   // misc
   PRETTY_LOGS: boolish.default(true),
 });

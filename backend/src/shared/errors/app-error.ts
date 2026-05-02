@@ -67,6 +67,13 @@ export class AppError extends Error {
   static rateLimited(message = 'Too many requests'): AppError {
     return new AppError({ code: ErrorCode.RATE_LIMITED, statusCode: 429, message });
   }
+  static serviceUnavailable(message = 'Service unavailable'): AppError {
+    return new AppError({
+      code: ErrorCode.SERVICE_UNAVAILABLE,
+      statusCode: 503,
+      message,
+    });
+  }
   static internal(message = 'Internal error', cause?: unknown): AppError {
     return new AppError({ code: ErrorCode.INTERNAL, statusCode: 500, message, cause });
   }

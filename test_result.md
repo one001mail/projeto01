@@ -335,3 +335,29 @@ agent_communication:
       yarn test:coverage 48/48 tests passa, yarn build ok.
       Sandbox-only: nenhum endpoint sensivel implementado. Proxima
       fase: F3 (idempotency + audit-log + admin-auth middlewares).
+  - agent: "main"
+    message: |
+      ETAPA F3 concluida (PROMPT MESTRE).
+      Middlewares HTTP cross-cutting implementados em
+      backend/src/api/http/middlewares/:
+        - idempotency.middleware.ts (Idempotency-Key, hash SHA-256)
+        - audit-log.middleware.ts (1 linha por mutacao 2xx, redigida)
+        - admin-auth.middleware.ts (503 sem config, 401 sem/wrong key)
+      Adapters: pg-idempotency.store.ts, pg-audit-log.store.ts,
+      api-key.admin-auth.ts; novos in-memory para testes.
+      Novo port shared/application/ports/audit-log.port.ts e utility
+      pura shared/application/redaction.ts.
+      Wiring: idempotency aplicado em learning-sessions e
+      contact-requests (scope /api antes das rotas), admin-auth em
+      /api/admin/*, audit-log global em registerPlugins.
+      Config + .env: ADMIN_API_KEY, IDEMPOTENCY_TTL_SECONDS,
+      AUDIT_REDACT_FIELDS. Boundary checker atualizado: module-root
+      pode importar de api/.
+      Gates: typecheck 0, lint 0, check:boundaries 0 violacoes,
+      14 suites/66 testes (era 12/48). Cobertura backend 78,49%.
+      Build ok. Supervisor restart -> RUNNING. Curl externo
+      /api/admin/health: 401 sem header, 401 com header errado,
+      envelope valido com header correto.
+      Sandbox-only intacto: nenhuma rota nova, nenhum dominio
+      sensivel tocado. Proxima fase: F4 (outbox dispatcher +
+      scheduler worker).

@@ -7,6 +7,7 @@
  */
 import { randomInt } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
+import { idempotencyMiddleware } from '../../api/http/middlewares/idempotency.middleware.js';
 import { SystemClock } from '../../shared/application/ports/clock.port.js';
 import { CryptoUuidGenerator } from '../../shared/application/ports/uuid.port.js';
 import { CreateLearningSessionUseCase } from './application/create-learning-session.use-case.js';
@@ -34,6 +35,10 @@ export async function registerLearningSessionsModule(app: FastifyInstance): Prom
 
   await app.register(
     async (api) => {
+      // Idempotency middleware applies to mutating routes in this module.
+      await api.register(idempotencyMiddleware, {
+        ttlSeconds: app.ctx.config.IDEMPOTENCY_TTL_SECONDS,
+      });
       await api.register(makeLearningSessionsRoutes({ createUc, getUc }));
     },
     { prefix: '/api' },

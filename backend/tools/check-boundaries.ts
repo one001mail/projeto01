@@ -12,7 +12,7 @@
  *   module-application  -> module-domain, shared-port, shared-application, shared-types,
  *                          shared-errors, shared-domain
  *   module-infra        -> module-domain, module-application, shared-*, project-infra
- *   module-root         -> own module subtree, shared-*, project-infra, app
+ *   module-root         -> own module subtree, shared-*, project-infra, api, app
  *   shared-port         -> shared-port, shared-types, shared-errors, shared-domain
  *   shared-application  -> shared-port, shared-application, shared-types, shared-errors,
  *                          shared-domain
@@ -146,6 +146,7 @@ const ALLOWED: Record<Layer, readonly Layer[]> = {
     'shared-errors',
     'shared-domain',
     'infra',
+    'api',
     'app',
   ],
   'shared-port': ['shared-port', 'shared-types', 'shared-errors', 'shared-domain'],

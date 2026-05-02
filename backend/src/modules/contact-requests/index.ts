@@ -2,6 +2,7 @@
  * Contact-requests module composition root.
  */
 import type { FastifyInstance } from 'fastify';
+import { idempotencyMiddleware } from '../../api/http/middlewares/idempotency.middleware.js';
 import { SystemClock } from '../../shared/application/ports/clock.port.js';
 import { CryptoUuidGenerator } from '../../shared/application/ports/uuid.port.js';
 import { SubmitContactRequestUseCase } from './application/submit-contact-request.use-case.js';
@@ -26,6 +27,9 @@ export async function registerContactRequestsModule(app: FastifyInstance): Promi
 
   await app.register(
     async (api) => {
+      await api.register(idempotencyMiddleware, {
+        ttlSeconds: app.ctx.config.IDEMPOTENCY_TTL_SECONDS,
+      });
       await api.register(makeContactRequestsRoutes({ submitUc }));
     },
     { prefix: '/api' },

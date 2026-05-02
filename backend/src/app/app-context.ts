@@ -14,7 +14,9 @@ import type { FastifyInstance } from 'fastify';
 import type { Redis } from 'ioredis';
 import type { Pool } from 'pg';
 import type { OutboxStore } from '../infra/events/outbox-store.js';
+import type { AuditLogStore } from '../shared/application/ports/audit-log.port.js';
 import type { EventBus } from '../shared/application/ports/event-bus.port.js';
+import type { IdempotencyStore } from '../shared/application/ports/idempotency-store.port.js';
 import type { QueuePort } from '../shared/application/ports/queue.port.js';
 import type { TransactionManager } from '../shared/application/ports/transaction-manager.port.js';
 import type { Config } from './config.js';
@@ -27,6 +29,8 @@ export interface AppContext {
   readonly queue: QueuePort;
   readonly tm: TransactionManager;
   readonly outbox: OutboxStore;
+  readonly idempotency: IdempotencyStore;
+  readonly auditLog: AuditLogStore;
 }
 
 declare module 'fastify' {

@@ -1,8 +1,10 @@
+import { createPgAuditLogStore } from '../infra/audit/pg-audit-log.store.js';
 import { closeRedis, getRedis } from '../infra/cache/redis.js';
 import { closePostgres, getPool } from '../infra/db/postgres.js';
 import { PgTransactionManager } from '../infra/db/transaction-manager.js';
 import { createInMemoryEventBus } from '../infra/events/event-bus.js';
 import { createPgOutboxStore } from '../infra/events/outbox-store.js';
+import { createPgIdempotencyStore } from '../infra/idempotency/pg-idempotency.store.js';
 import { createNoopQueue } from '../infra/queue/noop-queue.js';
 /**
  * Dependency Container.
@@ -33,6 +35,12 @@ export function createContainer(config: Config): Container {
   const outbox = createPgOutboxStore({
     defaultRunner: () => tm.getCurrentRunner(),
   });
+  const idempotency = createPgIdempotencyStore({
+    defaultRunner: () => tm.getCurrentRunner(),
+  });
+  const auditLog = createPgAuditLogStore({
+    defaultRunner: () => tm.getCurrentRunner(),
+  });
 
   let disposed = false;
   const dispose = async (): Promise<void> => {
@@ -45,7 +53,18 @@ export function createContainer(config: Config): Container {
     await closePostgres().catch(() => undefined);
   };
 
-  return { config, pg, redis, eventBus, queue, tm, outbox, dispose };
+  return {
+    config,
+    pg,
+    redis,
+    eventBus,
+    queue,
+    tm,
+    outbox,
+    idempotency,
+    auditLog,
+    dispose,
+  };
 }
 
 /** Convenience for callers that don't keep a reference to the container. */
