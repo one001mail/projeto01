@@ -93,6 +93,21 @@ const ConfigSchema = z.object({
         .filter(Boolean),
     ),
 
+  // F4 — sandbox toggle and in-memory fallbacks
+  // When true (preview/dev only), the composition root falls back to
+  // in-memory adapters if Postgres/Redis are unreachable. Ignored in
+  // production regardless of value.
+  SANDBOX_ONLY: boolish.default(false),
+
+  // F4 — background workers (outbox dispatcher, schedulers).
+  WORKERS_ENABLED: boolish.default(false),
+
+  // F4 — outbox dispatcher tuning
+  OUTBOX_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(1_000),
+  OUTBOX_BATCH_SIZE: z.coerce.number().int().positive().default(50),
+  OUTBOX_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
+  OUTBOX_BACKOFF_BASE_MS: z.coerce.number().int().nonnegative().default(250),
+
   // misc
   PRETTY_LOGS: boolish.default(true),
 });

@@ -21,15 +21,17 @@ import { type Container, createContainer } from './dependency-container.js';
 import { registerModules } from './register-modules.js';
 import { registerPlugins } from './register-plugins.js';
 import { registerRoutes } from './register-routes.js';
+import { type WorkersHandle, createEventHandlerRegistry, startWorkers } from './workers.js';
 
 export interface BuiltApp {
   app: FastifyInstance;
   container: Container;
+  workers: WorkersHandle;
 }
 
 export async function buildApp(config: Config): Promise<BuiltApp> {
-  // 1. Container (cheap; no I/O until pinged)
-  const container = createContainer(config);
+  // 1. Container (probes PG once to decide on sandbox fallback)
+  const container = await createContainer(config);
 
   // 2. Fastify
   const app = Fastify({
@@ -49,8 +51,15 @@ export async function buildApp(config: Config): Promise<BuiltApp> {
   await registerRoutes(app);
   await registerModules(app);
 
-  // 7. Container disposal hook
+  // 6.5. Background workers (outbox dispatcher, etc.). Event handler
+  //      collection is ready here for future modules that declare
+  //      subscriptions via `app.ctx` during `registerModules`.
+  const { registrations } = createEventHandlerRegistry();
+  const workers = startWorkers({ app, registrations });
+
+  // 7. Container + workers disposal hook (workers first, then resources)
   app.addHook('onClose', async () => {
+    await workers.stop();
     await container.dispose();
   });
 
@@ -64,5 +73,5 @@ export async function buildApp(config: Config): Promise<BuiltApp> {
     'application built',
   );
 
-  return { app, container };
+  return { app, container, workers };
 }

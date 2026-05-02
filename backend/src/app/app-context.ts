@@ -13,6 +13,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { Redis } from 'ioredis';
 import type { Pool } from 'pg';
+import type { InboxStore } from '../infra/events/inbox-store.js';
 import type { OutboxStore } from '../infra/events/outbox-store.js';
 import type { AuditLogStore } from '../shared/application/ports/audit-log.port.js';
 import type { EventBus } from '../shared/application/ports/event-bus.port.js';
@@ -29,8 +30,15 @@ export interface AppContext {
   readonly queue: QueuePort;
   readonly tm: TransactionManager;
   readonly outbox: OutboxStore;
+  readonly inbox: InboxStore;
   readonly idempotency: IdempotencyStore;
   readonly auditLog: AuditLogStore;
+  /**
+   * True when the container elected the sandbox fallback path:
+   * PG probe failed, `SANDBOX_ONLY=true`, and `NODE_ENV !== 'production'`.
+   * Modules consult this to pick in-memory repositories.
+   */
+  readonly sandboxFallback: boolean;
 }
 
 declare module 'fastify' {
