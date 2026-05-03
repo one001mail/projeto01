@@ -2,6 +2,7 @@ import { InMemoryAuditLogStore } from '../infra/audit/in-memory-audit-log.store.
 import { createPgAuditLogStore } from '../infra/audit/pg-audit-log.store.js';
 import { closeRedis, getRedis } from '../infra/cache/redis.js';
 import { closePostgres, getPool } from '../infra/db/postgres.js';
+import { NoopTransactionManager } from '../infra/db/noop-transaction-manager.js';
 import { probePostgres } from '../infra/db/probe-postgres.js';
 import { PgTransactionManager } from '../infra/db/transaction-manager.js';
 import { createInMemoryEventBus } from '../infra/events/event-bus.js';
@@ -52,11 +53,15 @@ export async function createContainer(config: Config): Promise<Container> {
   const redis = getRedis();
   const eventBus = createInMemoryEventBus();
   const queue = createNoopQueue();
-  const tm = new PgTransactionManager(pg);
 
   const canUseFallback = config.SANDBOX_ONLY && config.NODE_ENV !== 'production';
   const pgReachable = canUseFallback ? await probePostgres(pg) : true;
   const sandboxFallback = canUseFallback && !pgReachable;
+
+  // When the sandbox fallback is active, swap the Postgres-backed transaction
+  // manager for a no-op so use cases that try to wrap PG calls in a tx can
+  // still run with in-memory repositories. The Pg manager is kept otherwise.
+  const tm = sandboxFallback ? new NoopTransactionManager() : new PgTransactionManager(pg);
 
   const outbox = sandboxFallback
     ? createInMemoryOutboxStore({ maxAttempts: config.OUTBOX_MAX_ATTEMPTS })

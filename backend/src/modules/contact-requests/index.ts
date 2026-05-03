@@ -7,15 +7,20 @@ import { SystemClock } from '../../shared/application/ports/clock.port.js';
 import { CryptoUuidGenerator } from '../../shared/application/ports/uuid.port.js';
 import { SubmitContactRequestUseCase } from './application/submit-contact-request.use-case.js';
 import { makeContactRequestsRoutes } from './infra/http/routes.js';
+import { InMemoryContactRequestRepository } from './infra/in-memory-contact-request.repository.js';
 import { createPgContactRequestRepository } from './infra/pg-contact-request.repository.js';
 
 export async function registerContactRequestsModule(app: FastifyInstance): Promise<void> {
   const tm = app.ctx.tm;
   const outbox = app.ctx.outbox;
 
-  const repo = createPgContactRequestRepository({
-    defaultRunner: () => tm.getCurrentRunner(),
-  });
+  // In sandbox fallback (no Postgres), use the in-memory repository so the
+  // contact submission flow stays usable in preview environments.
+  const repo = app.ctx.sandboxFallback
+    ? new InMemoryContactRequestRepository()
+    : createPgContactRequestRepository({
+        defaultRunner: () => tm.getCurrentRunner(),
+      });
 
   const submitUc = new SubmitContactRequestUseCase({
     repo,

@@ -275,6 +275,30 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
+      BUGFIX: "Criar Sessão" -> HTTP 404.
+      Causa raiz: backend Fastify estava STOPPED no supervisor porque
+      /app/backend/node_modules nunca foi instalado (tsx not found).
+      Cluster ingress retornava 404 para /api/* enquanto o backend estava
+      down. Apos `yarn install` em /app/backend, o backend subiu, mas o
+      POST /api/learning-sessions passou a falhar com 500
+      "connect ECONNREFUSED 127.0.0.1:5432" — modulos PG-only num sandbox
+      sem Postgres.
+      Fix:
+        - dependency-container.ts agora elege NoopTransactionManager
+          quando sandboxFallback=true (em vez de PgTransactionManager).
+        - learning-sessions/index.ts usa InMemoryLearningSessionRepository
+          quando ctx.sandboxFallback.
+        - contact-requests/index.ts usa InMemoryContactRequestRepository
+          quando ctx.sandboxFallback.
+      Validacao:
+        yarn typecheck -> 0 errors
+        yarn test -> 29 files / 151 tests passa
+        curl POST https://<preview>/api/learning-sessions -> 200 com
+          session.publicCode preenchido.
+        curl GET /api/learning-sessions/:publicCode -> 200 com a mesma
+          sessao.
+  - agent: "main"
+    message: |
       P0 baseline gates set up. All four hard gates verified locally:
       typecheck (zero errors, strict mode on), lint (zero errors),
       test:coverage (33 frontend + 25 backend tests passing, both
