@@ -24,6 +24,7 @@ import { registerLogMinimizerModule } from '../modules/log-minimizer/index.js';
 import { registerPaymentSchedulerModule } from '../modules/payment-scheduler/index.js';
 import { registerPricingModule } from '../modules/pricing/index.js';
 import { registerResourceReservationsModule } from '../modules/resource-reservations/index.js';
+import { registerWalletModule } from '../modules/wallet/index.js';
 
 export interface RegisteredModule {
   readonly name: string;
@@ -50,6 +51,9 @@ const MODULES: readonly RegisteredModule[] = [
   { name: 'liquidity-pool', register: registerLiquidityPoolModule },
   { name: 'log-minimizer', register: registerLogMinimizerModule },
   { name: 'payment-scheduler', register: registerPaymentSchedulerModule },
+  // Wallet module \u2014 production-oriented crypto wallet infrastructure (testnet
+  // by default; mainnet gated by WALLET_ENABLE_MAINNET).
+  { name: 'wallet', register: registerWalletModule },
 ];
 
 export async function registerModules(app: FastifyInstance): Promise<void> {
